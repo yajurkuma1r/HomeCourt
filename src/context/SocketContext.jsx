@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useEffect, useMemo, useRef, useState } from 'react';
 import { io } from 'socket.io-client';
 import { useAuth } from './AuthContext';
+import { API_URL } from '../config';
 
 const SocketContext = createContext(null);
 const AUTH_TOKEN_KEY = 'stayclose_auth_token';
@@ -26,7 +27,7 @@ export const SocketProvider = ({ children }) => {
       return undefined;
     }
 
-    const socket = io('/', {
+    const socket = io(API_URL || '/', {
       auth: { token },
       path: '/socket.io',
       transports: ['websocket', 'polling']

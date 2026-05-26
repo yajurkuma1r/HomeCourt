@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import GlobalLoader from '../components/shared/GlobalLoader';
+import { apiPath } from '../config';
 
 const AuthContext = createContext();
 const AUTH_TOKEN_KEY = 'stayclose_auth_token';
@@ -8,7 +9,7 @@ const request = async (path, options = {}) => {
   let res;
 
   try {
-    res = await fetch(path, {
+    res = await fetch(apiPath(path), {
       ...options,
       headers: {
         'Content-Type': 'application/json',
@@ -190,7 +191,7 @@ export const AuthProvider = ({ children }) => {
   const logout = () => {
     const token = localStorage.getItem(AUTH_TOKEN_KEY);
     if (token) {
-      fetch('/api/auth/logout', {
+      fetch(apiPath('/api/auth/logout'), {
         method: 'POST',
         headers: {
           Authorization: `Bearer ${token}`
