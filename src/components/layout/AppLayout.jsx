@@ -157,7 +157,8 @@ const Sidebar = ({ onStartCall, isCallActive, onRequestLogout, onOpenHelp, onNew
               const maxAge = 3 * 60 * 1000;
               const opacity = Math.max(0.1, 1 - (age / maxAge));
               return (
-                <div 
+                <div
+                  className="sidebar-footprint"
                   key={f.userId} 
                   style={{ 
                     position: 'absolute', 
@@ -351,9 +352,9 @@ const HouseInfoMenu = (props) => {
   const [isOpen, setIsOpen] = useState(false);
   return (
     <div style={{ position: 'relative' }}>
-      <button 
+      <button
         onClick={() => setIsOpen(!isOpen)} 
-        className="glass-panel" 
+        className="glass-panel house-menu-trigger"
         style={{ 
           padding: '12px 18px', 
           borderRadius: '18px', 
@@ -379,7 +380,7 @@ const HouseInfoMenu = (props) => {
       </button>
 
       {isOpen && (
-        <div style={{ position: 'absolute', top: '100%', right: 0, marginTop: '12px', zIndex: 100, display: 'flex', flexDirection: 'column', gap: '12px' }}>
+        <div className="house-menu-popover" style={{ position: 'absolute', top: '100%', right: 0, marginTop: '12px', zIndex: 100, display: 'flex', flexDirection: 'column', gap: '12px' }}>
           
           <div className="glass-panel brand-panel" style={{ width: '360px', padding: '16px', borderRadius: '18px', textAlign: 'center' }}>
             <div style={{ fontSize: '12px', letterSpacing: '0.24em', textTransform: 'uppercase', color: 'var(--text-secondary)', marginBottom: '4px' }}>

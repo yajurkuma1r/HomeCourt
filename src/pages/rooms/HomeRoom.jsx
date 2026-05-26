@@ -367,7 +367,7 @@ const HomeRoom = () => {
   const mappedMembers = members.filter((member) => member.location);
 
   return (
-    <div style={{ flex: 1, minHeight: 0, display: 'flex', flexDirection: 'column', gap: '24px', padding: '0 16px 8px' }}>
+    <div className="home-room" style={{ flex: 1, minHeight: 0, display: 'flex', flexDirection: 'column', gap: '24px', padding: '0 16px 8px' }}>
       <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: '16px', flexWrap: 'wrap' }}>
         <div>
           <div style={{ display: 'inline-flex', alignItems: 'center', gap: '10px', padding: '8px 12px', borderRadius: '999px', background: 'rgba(255,255,255,0.06)', color: 'var(--text-secondary)', marginBottom: '12px' }}>

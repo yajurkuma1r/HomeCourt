@@ -103,7 +103,7 @@ const ChatRoom = ({ hideHeader = false, room = 'general' }) => {
   };
 
   return (
-    <div style={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
+    <div className="chat-room" style={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
       {!hideHeader && (
         <div style={{ paddingBottom: '16px', borderBottom: '1px solid var(--border-glass)', marginBottom: '16px' }}>
           <h2 style={{ margin: 0, letterSpacing: '0.08em', fontSize: '22px' }}>CHATROOM</h2>

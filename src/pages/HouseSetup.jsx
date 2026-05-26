@@ -197,7 +197,7 @@ const HouseSetup = () => {
 
   return (
     <div className="setup-page" style={{ display: 'flex', minHeight: '100vh', alignItems: 'center', justifyContent: 'center', padding: '24px', background: 'radial-gradient(circle at 72% 18%, rgba(255, 45, 160, 0.18), transparent 28%), radial-gradient(circle at 12% 86%, rgba(123, 31, 162, 0.24), transparent 36%)', position: 'relative' }}>
-      <div style={{ position: 'absolute', top: '32px', right: '32px', zIndex: 50, display: 'flex', gap: '16px', alignItems: 'center' }}>
+      <div className="setup-top-actions" style={{ position: 'absolute', top: '32px', right: '32px', zIndex: 50, display: 'flex', gap: '16px', alignItems: 'center' }}>
         <button
           type="button"
           onClick={logout}
