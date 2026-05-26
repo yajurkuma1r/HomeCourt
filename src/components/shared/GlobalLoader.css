@@ -1,28 +1,38 @@
 .global-loader-overlay {
   position: fixed;
-  top: 0;
-  left: 0;
-  width: 100vw;
-  height: 100vh;
+  inset: 0;
+  width: 100%;
+  min-height: 100vh;
+  min-height: 100dvh;
   background-color: rgba(6, 3, 15, 0.95);
   z-index: 9999;
   display: flex;
   align-items: center;
   justify-content: center;
+  padding: max(18px, env(safe-area-inset-top)) 18px max(18px, env(safe-area-inset-bottom));
   backdrop-filter: blur(10px);
+  overflow: hidden;
 }
 
 .global-loader-content {
+  width: min(100%, 420px);
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 40px;
+  justify-content: center;
+  gap: clamp(20px, 5vh, 40px);
+  text-align: center;
+}
+
+.global-loader-content .homecourt-brand {
+  max-width: 100%;
+  transform-origin: center;
 }
 
 .global-loader-spinner-container {
   position: relative;
-  width: 80px;
-  height: 80px;
+  width: clamp(54px, 16vw, 80px);
+  height: clamp(54px, 16vw, 80px);
 }
 
 .global-loader-spinner {
@@ -42,12 +52,12 @@
 .global-loader-spinner::before {
   content: '';
   position: absolute;
-  width: 16px;
-  height: 16px;
+  width: 20%;
+  height: 20%;
   background-color: #ff2da0;
   border-radius: 50%;
-  top: 0px;
-  left: 32px;
+  top: 0;
+  left: 40%;
   box-shadow: 0 0 10px #ff2da0;
 }
 
@@ -58,9 +68,51 @@
 
 .global-loader-text {
   color: #ff2da0;
-  font-size: 14px;
+  font-size: clamp(11px, 3vw, 14px);
   font-weight: 700;
-  letter-spacing: 0.3em;
+  letter-spacing: 0.24em;
   text-transform: uppercase;
-  margin-top: -10px;
+  margin-top: clamp(-8px, -1vh, -4px);
+  margin-right: -0.24em;
+}
+
+@media (max-width: 520px) {
+  .global-loader-content {
+    gap: 22px;
+  }
+
+  .global-loader-content .homecourt-brand {
+    transform: scale(0.78);
+  }
+
+  .global-loader-content .homecourt-wordmark__main {
+    letter-spacing: 0.2em;
+    margin-right: -0.2em;
+  }
+
+  .global-loader-content .homecourt-wordmark small {
+    max-width: 240px;
+    line-height: 1.5;
+    letter-spacing: 0.16em;
+    margin-right: -0.16em;
+  }
+}
+
+@media (max-width: 380px) {
+  .global-loader-overlay {
+    padding-inline: 12px;
+  }
+
+  .global-loader-content {
+    gap: 18px;
+  }
+
+  .global-loader-content .homecourt-brand {
+    transform: scale(0.68);
+  }
+
+  .global-loader-spinner-container {
+    width: 48px;
+    height: 48px;
+  }
 }
