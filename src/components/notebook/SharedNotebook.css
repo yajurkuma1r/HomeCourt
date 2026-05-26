@@ -1,0 +1,175 @@
+.shared-notebook-container {
+  width: 100%;
+  max-width: 1100px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.notebook-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px 24px;
+  border-radius: 16px;
+  border-bottom: 1px solid rgba(217, 70, 239, 0.3); /* Magenta accent */
+}
+
+.notebook-wrapper {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 20px;
+  perspective: 2000px; /* 3D depth for page flip */
+  padding: 20px 0;
+  flex: 1;
+}
+
+.nav-btn {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid var(--border-glass);
+  color: white;
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.nav-btn:hover:not(:disabled) {
+  background: rgba(217, 70, 239, 0.2);
+  border-color: rgba(217, 70, 239, 0.5);
+  transform: scale(1.1);
+}
+
+.notebook-book {
+  display: flex;
+  position: relative;
+  width: 100%;
+  max-width: 920px;
+  aspect-ratio: 920 / 600;
+  max-height: calc(100vh - 280px); /* fit window without scroll */
+  border-radius: 12px;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.8), 0 0 0 1px rgba(255,255,255,0.1);
+  background: #2a2a2a; /* Cover color peeking out behind */
+  padding: 4px; /* Cover margin */
+  transform-style: preserve-3d;
+}
+
+.notebook-spine {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 40px;
+  background: linear-gradient(to right, 
+    rgba(0,0,0,0.6) 0%, 
+    rgba(0,0,0,0.2) 20%, 
+    rgba(255,255,255,0.1) 50%, 
+    rgba(0,0,0,0.2) 80%, 
+    rgba(0,0,0,0.6) 100%
+  );
+  z-index: 20;
+  box-shadow: inset 0 0 10px rgba(0,0,0,0.8);
+  pointer-events: none;
+}
+
+.notebook-page {
+  width: 50%;
+  height: 100%;
+  position: relative;
+  background: #fff;
+  transform-style: preserve-3d;
+}
+
+.left-page {
+  border-radius: 8px 0 0 8px;
+  transform-origin: right center;
+}
+
+.right-page {
+  border-radius: 0 8px 8px 0;
+  transform-origin: left center;
+}
+
+/* Animations */
+.flip-next-anim {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  bottom: 4px;
+  width: calc(50% - 4px);
+  z-index: 30;
+  animation: pageFlipNext 0.4s ease-in-out forwards;
+}
+
+.flip-prev-anim {
+  position: absolute;
+  top: 4px;
+  left: 4px;
+  bottom: 4px;
+  width: calc(50% - 4px);
+  z-index: 30;
+  animation: pageFlipPrev 0.4s ease-in-out forwards;
+}
+
+@keyframes pageFlipNext {
+  0% { transform: rotateY(0deg); }
+  100% { transform: rotateY(-180deg); }
+}
+
+@keyframes pageFlipPrev {
+  0% { transform: rotateY(0deg); }
+  100% { transform: rotateY(180deg); }
+}
+
+.flip-front, .flip-back {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  backface-visibility: hidden;
+}
+
+.flip-back {
+  transform: rotateY(180deg);
+}
+
+/* On right page flipping left, front is right page, back is new left page */
+.flip-next-anim .flip-front {
+  background: #fff;
+}
+.flip-next-anim .flip-back {
+  background: #fff;
+}
+
+.bookmarks-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 16px;
+  border-radius: 16px;
+  background: rgba(0,0,0,0.3);
+  width: 250px;
+}
+
+.bookmark-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 12px;
+  background: rgba(255,255,255,0.05);
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.bookmark-item:hover {
+  background: rgba(217, 70, 239, 0.2);
+}
