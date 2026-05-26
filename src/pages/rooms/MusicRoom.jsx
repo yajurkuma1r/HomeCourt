@@ -167,6 +167,9 @@ const MusicRoom = () => {
           <div style={{ marginTop: '10px', color: '#bfdbfe', fontSize: '13px', maxWidth: '720px' }}>
             Spotify can be shared here by the admin, but true synchronized multi-user playback is restricted by Spotify policy, so playback remains local per listener.
           </div>
+          <div style={{ marginTop: '8px', color: '#fef3c7', fontSize: '13px', maxWidth: '720px' }}>
+            On phones, Spotify embeds often play only previews unless the listener opens Spotify or is signed in through a supported Spotify experience. That is controlled by Spotify, not HomeCourt.
+          </div>
         </div>
         {isAdmin ? (
           <div style={{ display: 'flex', gap: '8px', alignItems: 'center', flexWrap: 'wrap', maxWidth: '520px', justifyContent: 'flex-end' }}>
@@ -235,6 +238,11 @@ const MusicRoom = () => {
           <div style={{ color: 'var(--text-secondary)', fontSize: '14px', lineHeight: 1.7 }}>
             Everyone in the house sees the same Spotify content here. The admin can either play something immediately or line it up in the house queue, and each listener can still play it locally in the embedded Spotify player.
           </div>
+          {spotifyState?.sourceUrl ? (
+            <a href={spotifyState.sourceUrl} target="_blank" rel="noreferrer" style={{ color: '#86efac', fontWeight: 700 }}>
+              Open in Spotify for full playback
+            </a>
+          ) : null}
           <div className="glass-panel" style={{ padding: '16px', borderRadius: '16px', display: 'flex', flexDirection: 'column', gap: '10px' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontWeight: 700 }}>
               <ListMusic size={16} />

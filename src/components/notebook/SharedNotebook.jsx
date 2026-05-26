@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useRef } from 'react';
-import { ChevronLeft, ChevronRight, Edit3, Type, X, BookmarkPlus, Search, Bookmark, Trash2 } from 'lucide-react';
+import { ArrowRight, ChevronLeft, ChevronRight, Edit3, Type, X, BookmarkPlus, Search, Bookmark, Trash2 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { useSocket } from '../../context/SocketContext';
 import NotebookPage from './NotebookPage';
@@ -267,7 +267,7 @@ const SharedNotebook = ({ onClose, notebookType = 'main' }) => {
               <Bookmark size={18} color="var(--primary)" /> Bookmarks
             </h3>
             
-            <form onSubmit={handleSearchSubmit} style={{ display: 'flex', background: 'rgba(0,0,0,0.2)', borderRadius: '8px', padding: '6px' }}>
+            <form onSubmit={handleSearchSubmit} style={{ display: 'flex', background: 'rgba(0,0,0,0.2)', borderRadius: '8px', padding: '6px', gap: '4px', alignItems: 'center' }}>
               <Search size={16} color="var(--text-secondary)" style={{ margin: '4px' }} />
               <input 
                 type="number" 
@@ -277,6 +277,13 @@ const SharedNotebook = ({ onClose, notebookType = 'main' }) => {
                 onChange={(e) => setSearchPage(e.target.value)}
                 style={{ background: 'transparent', border: 'none', color: 'white', width: '100%', outline: 'none', fontSize: '13px' }}
               />
+              <button
+                type="submit"
+                title="Go to typed page"
+                style={{ width: '30px', height: '30px', borderRadius: '8px', border: 'none', background: 'var(--primary)', color: 'white', display: 'grid', placeItems: 'center', cursor: 'pointer', flex: '0 0 auto' }}
+              >
+                <ArrowRight size={14} />
+              </button>
             </form>
 
             <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', maxHeight: '200px', overflowY: 'auto' }}>

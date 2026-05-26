@@ -633,7 +633,7 @@ const HomeRoom = () => {
             <div style={{ background: 'rgba(14, 165, 233, 0.2)', padding: '10px', borderRadius: '12px' }}><Monitor color="#0ea5e9" size={20} /></div>
             <h3 style={{ margin: 0 }}>Shared Screen Box</h3>
           </div>
-          <p style={{ color: 'var(--text-secondary)', fontSize: '14px', margin: 0 }}>View the admin's broadcasted screen live.</p>
+          <p style={{ color: 'var(--text-secondary)', fontSize: '14px', margin: 0 }}>View the admin's broadcasted screen live. Starting a screen share works on desktop only.</p>
         </div>
       </div>
     </div>

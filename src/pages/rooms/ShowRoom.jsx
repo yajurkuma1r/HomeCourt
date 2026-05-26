@@ -34,6 +34,13 @@ const ShowRoom = () => {
   }, [activeHouse?.id]);
 
   useEffect(() => {
+    if (cameraOpen && videoRef.current && streamRef.current && !capturedImage) {
+      videoRef.current.srcObject = streamRef.current;
+      videoRef.current.play?.().catch(() => {});
+    }
+  }, [cameraOpen, capturedImage]);
+
+  useEffect(() => {
     if (!socket) {
       return undefined;
     }
@@ -77,12 +84,6 @@ const ShowRoom = () => {
       streamRef.current = stream;
       setCameraOpen(true);
       setCapturedImage('');
-
-      requestAnimationFrame(() => {
-        if (videoRef.current) {
-          videoRef.current.srcObject = stream;
-        }
-      });
     } catch (cameraError) {
       setError(cameraError.message || 'Could not open the camera.');
     }

@@ -252,8 +252,8 @@ const readBody = (req) =>
 
     req.on('data', (chunk) => {
       body += chunk;
-      if (body.length > 1_000_000) {
-        reject(new Error('Payload too large.'));
+      if (body.length > 5_000_000) {
+        reject(new Error('Payload too large. Use a smaller image and try again.'));
       }
     });
 

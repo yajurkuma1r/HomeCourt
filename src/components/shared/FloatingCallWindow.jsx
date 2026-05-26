@@ -23,10 +23,15 @@ const FloatingCallWindow = ({ onClose }) => {
   const [videoOn, setVideoOn] = useState(true);
   const [joining, setJoining] = useState(true);
   const [error, setError] = useState('');
-  const [position, setPosition] = useState({
-    x: Math.max(20, window.innerWidth - 420),
-    y: Math.max(20, window.innerHeight - 470)
-  });
+  const isSmallScreen = () => window.innerWidth <= 700;
+  const getInitialPosition = () =>
+    isSmallScreen()
+      ? { x: 12, y: Math.max(12, window.innerHeight - 360) }
+      : {
+          x: Math.max(20, window.innerWidth - 420),
+          y: Math.max(20, window.innerHeight - 470)
+        };
+  const [position, setPosition] = useState(getInitialPosition);
   const [dragging, setDragging] = useState(false);
   const [remoteUsers, setRemoteUsers] = useState([]);
   const offsetRef = useRef({ x: 0, y: 0 });
@@ -185,10 +190,22 @@ const FloatingCallWindow = ({ onClose }) => {
   }, [socket, connected, activeHouse?.id]);
 
   useEffect(() => {
-    if (localVideoRef.current && localStreamRef.current) {
+    if (!minimized && localVideoRef.current && localStreamRef.current) {
       localVideoRef.current.srcObject = localStreamRef.current;
+      localVideoRef.current.play?.().catch(() => {});
     }
-  }, [joining]);
+  }, [joining, minimized, videoOn]);
+
+  useEffect(() => {
+    const handleResize = () => {
+      setPosition((current) => ({
+        x: Math.max(8, Math.min(window.innerWidth - (isSmallScreen() ? 76 : 240), current.x)),
+        y: Math.max(8, Math.min(window.innerHeight - 120, current.y))
+      }));
+    };
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
 
   useEffect(() => {
     if (!socket || !activeHouse?.id) {
@@ -315,9 +332,11 @@ const FloatingCallWindow = ({ onClose }) => {
       return;
     }
 
+    const maxX = isSmallScreen() ? window.innerWidth - 76 : window.innerWidth - 240;
+    const maxY = isSmallScreen() ? window.innerHeight - 88 : window.innerHeight - 140;
     setPosition({
-      x: Math.max(12, Math.min(window.innerWidth - 240, event.clientX - offsetRef.current.x)),
-      y: Math.max(12, Math.min(window.innerHeight - 140, event.clientY - offsetRef.current.y))
+      x: Math.max(8, Math.min(maxX, event.clientX - offsetRef.current.x)),
+      y: Math.max(8, Math.min(maxY, event.clientY - offsetRef.current.y))
     });
   };
 
@@ -349,7 +368,7 @@ const FloatingCallWindow = ({ onClose }) => {
   if (minimized) {
     return (
       <div
-        className="glass-panel"
+        className="glass-panel floating-call-window floating-call-window--minimized"
         style={{
           position: 'fixed',
           left: `${position.x}px`,
@@ -370,22 +389,23 @@ const FloatingCallWindow = ({ onClose }) => {
       >
         <Wifi size={14} color={connected ? '#22c55e' : '#f97316'} />
         <span style={{ fontWeight: 600, pointerEvents: 'none' }}>House Call</span>
-        <div
-          style={{ cursor: 'pointer', zIndex: 2 }}
-          onPointerDown={(event) => {
+        <button
+          type="button"
+          style={{ cursor: 'pointer', zIndex: 2, background: 'transparent', border: 'none', color: 'var(--text-secondary)', display: 'grid', placeItems: 'center' }}
+          onClick={(event) => {
             event.stopPropagation();
             setMinimized(false);
           }}
         >
           <Maximize2 size={18} color="var(--text-secondary)" />
-        </div>
+        </button>
       </div>
     );
   }
 
   return (
     <div
-      className="glass-panel"
+      className="glass-panel floating-call-window"
       style={{
         position: 'fixed',
         left: `${position.x}px`,

@@ -88,6 +88,10 @@ iframe {
   display: none;
 }
 
+.floating-call-window {
+  max-width: calc(100vw - 16px);
+}
+
 /* Common App Layout */
 .app-container {
   display: flex;
@@ -630,6 +634,63 @@ iframe {
 
   .main-content .shared-notebook-container {
     width: 100%;
+  }
+
+  .study-room {
+    gap: 18px !important;
+    height: auto !important;
+    min-height: 0;
+  }
+
+  .study-room-layout {
+    flex-direction: column !important;
+    align-items: stretch !important;
+    gap: 18px !important;
+  }
+
+  .study-notebook-panel {
+    order: 2;
+    min-width: 0 !important;
+    width: 100%;
+    max-width: 100% !important;
+    height: auto !important;
+    display: block !important;
+  }
+
+  .study-timer-panel {
+    order: 1;
+    width: 100%;
+    gap: 16px !important;
+  }
+
+  .study-timer-panel [style*="font-size: 80px"] {
+    font-size: clamp(42px, 13vw, 64px) !important;
+  }
+
+  .floating-call-window {
+    left: 8px !important;
+    right: 8px !important;
+    top: auto !important;
+    bottom: calc(82px + env(safe-area-inset-bottom)) !important;
+    width: auto !important;
+    max-height: calc(100dvh - 106px);
+    border-radius: 18px !important;
+  }
+
+  .floating-call-window--minimized {
+    right: auto !important;
+    bottom: calc(86px + env(safe-area-inset-bottom)) !important;
+    width: max-content !important;
+    max-width: calc(100vw - 16px);
+  }
+
+  .floating-call-window [style*="grid-template-columns"] {
+    grid-template-columns: 1fr !important;
+  }
+
+  .floating-call-window video,
+  .floating-call-window [style*="min-height: 180px"] {
+    min-height: 160px !important;
   }
 }
 

@@ -252,6 +252,10 @@ const ScreenShareFeature = () => {
         </div>
       )}
 
+      <div className="glass-panel" style={{ padding: '14px 16px', marginBottom: '18px', color: '#bfdbfe', borderColor: 'rgba(96,165,250,0.28)', lineHeight: 1.5 }}>
+        Screen sharing can only be started from a desktop browser. Phones can usually view a shared screen, but mobile browsers do not allow starting a full screen share.
+      </div>
+
       <div className="glass-panel" style={{ flex: 1, borderRadius: '24px', overflow: 'hidden', position: 'relative', background: '#0f0f13', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
         <video 
           ref={videoRef} 

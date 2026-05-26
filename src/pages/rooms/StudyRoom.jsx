@@ -80,21 +80,21 @@ const StudyRoom = () => {
   const seconds = timeLeft % 60;
 
   return (
-    <div style={{ height: '100%', display: 'flex', flexDirection: 'column', gap: '32px', paddingTop: '8px' }}>
+    <div className="study-room" style={{ height: '100%', display: 'flex', flexDirection: 'column', gap: '32px', paddingTop: '8px' }}>
       <div style={{ paddingBottom: '16px', borderBottom: '1px solid var(--border-glass)' }}>
         <h2 style={{ margin: 0, letterSpacing: '0.08em', fontSize: '22px' }}>STUDYROOM</h2>
         <span style={{ color: 'var(--text-secondary)', fontSize: '14px' }}>Shared productivity space with a timer ringer at the end.</span>
       </div>
 
-      <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '32px', minHeight: 0 }}>
+      <div className="study-room-layout" style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '32px', minHeight: 0 }}>
         
         {/* Left Side: Shared Notebook */}
-        <div style={{ flex: 1, height: '100%', minWidth: '400px', maxWidth: '800px', display: 'flex' }}>
+        <div className="study-notebook-panel" style={{ flex: 1, height: '100%', minWidth: '400px', maxWidth: '800px', display: 'flex' }}>
           <SharedNotebook notebookType="study" />
         </div>
 
         {/* Right Side: Timer */}
-        <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '32px' }}>
+        <div className="study-timer-panel" style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '32px' }}>
           <div style={{ position: 'relative', width: '280px', height: '280px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
           <div style={{ position: 'absolute', width: '100%', height: '100%', borderRadius: '50%', border: '2px solid rgba(255,255,255,0.05)', boxShadow: isRunning ? '0 0 60px rgba(155, 81, 224, 0.2)' : 'none', transition: 'all 1s' }} />
           <div style={{ position: 'absolute', width: '90%', height: '90%', borderRadius: '50%', border: '4px solid', borderColor: isRunning ? 'var(--primary)' : 'var(--border-glass)', transition: 'all 0.5s' }} />

@@ -171,21 +171,16 @@ export const AuthProvider = ({ children }) => {
   };
 
   const updateProfile = async (profileData) => {
-    setGlobalLoading(true);
-    try {
-      const data = await authedRequest('/api/auth/profile', {
-        method: 'POST',
-        body: JSON.stringify(profileData)
-      });
-      
-      const nextUser = data.user;
-      setUser(nextUser);
-      localStorage.setItem('stayclose_user', JSON.stringify(nextUser));
-      await refreshHouses(); // Refresh houses since user profile data is returned inside house members
-      return nextUser;
-    } finally {
-      setGlobalLoading(false);
-    }
+    const data = await authedRequest('/api/auth/profile', {
+      method: 'POST',
+      body: JSON.stringify(profileData)
+    });
+
+    const nextUser = data.user;
+    setUser(nextUser);
+    localStorage.setItem('stayclose_user', JSON.stringify(nextUser));
+    await refreshHouses(); // Refresh houses since user profile data is returned inside house members
+    return nextUser;
   };
 
   const logout = () => {

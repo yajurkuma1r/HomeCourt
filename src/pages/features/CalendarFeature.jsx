@@ -37,10 +37,13 @@ const CalendarFeature = () => {
 
   const handleCreate = async (e) => {
     e.preventDefault();
-    if (!title || !message || !date) return;
+    if (!title.trim() || !message.trim() || !date) {
+      setError('Event name, date and time, and message are required.');
+      return;
+    }
 
     try {
-      await createHouseEvent(activeHouse.id, { title, message, date });
+      await createHouseEvent(activeHouse.id, { title: title.trim(), message: message.trim(), date });
       setShowCreate(false);
       setTitle('');
       setMessage('');
@@ -85,10 +88,19 @@ const CalendarFeature = () => {
       {showCreate && (
         <form onSubmit={handleCreate} className="glass-panel" style={{ padding: '24px', marginBottom: '32px', display: 'flex', flexDirection: 'column', gap: '16px', maxWidth: '860px' }}>
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 220px', gap: '16px' }}>
-            <input type="text" placeholder="Event name" value={title} onChange={(e) => setTitle(e.target.value)} style={{ background: 'rgba(0,0,0,0.2)', border: '1px solid var(--border-glass)', padding: '12px', color: 'white', borderRadius: '8px', outline: 'none' }} />
-            <input type="datetime-local" value={date} onChange={(e) => setDate(e.target.value)} style={{ background: 'rgba(0,0,0,0.2)', border: '1px solid var(--border-glass)', padding: '12px', color: 'white', borderRadius: '8px', outline: 'none' }} />
+            <label style={{ display: 'flex', flexDirection: 'column', gap: '8px', color: 'var(--text-secondary)', fontSize: '13px', fontWeight: 700 }}>
+              Event name <span style={{ color: '#fda4af' }}>*</span>
+              <input required type="text" placeholder="Event name" value={title} onChange={(e) => setTitle(e.target.value)} style={{ background: 'rgba(0,0,0,0.2)', border: '1px solid var(--border-glass)', padding: '12px', color: 'white', borderRadius: '8px', outline: 'none' }} />
+            </label>
+            <label style={{ display: 'flex', flexDirection: 'column', gap: '8px', color: 'var(--text-secondary)', fontSize: '13px', fontWeight: 700 }}>
+              Event date and time <span style={{ color: '#fda4af' }}>*</span>
+              <input required type="datetime-local" value={date} onChange={(e) => setDate(e.target.value)} style={{ background: 'rgba(0,0,0,0.2)', border: '1px solid var(--border-glass)', padding: '12px', color: 'white', borderRadius: '8px', outline: 'none' }} />
+            </label>
           </div>
-          <textarea placeholder="Add a message for the house" value={message} onChange={(e) => setMessage(e.target.value)} style={{ minHeight: '110px', background: 'rgba(0,0,0,0.2)', border: '1px solid var(--border-glass)', padding: '12px', color: 'white', borderRadius: '8px', outline: 'none', fontFamily: 'inherit' }} />
+          <label style={{ display: 'flex', flexDirection: 'column', gap: '8px', color: 'var(--text-secondary)', fontSize: '13px', fontWeight: 700 }}>
+            Message <span style={{ color: '#fda4af' }}>*</span>
+            <textarea required placeholder="Add a message for the house" value={message} onChange={(e) => setMessage(e.target.value)} style={{ minHeight: '110px', background: 'rgba(0,0,0,0.2)', border: '1px solid var(--border-glass)', padding: '12px', color: 'white', borderRadius: '8px', outline: 'none', fontFamily: 'inherit' }} />
+          </label>
           <button type="submit" style={{ alignSelf: 'flex-start', background: 'white', color: 'var(--bg-dark)', border: 'none', padding: '12px 22px', borderRadius: '8px', cursor: 'pointer', fontWeight: 'bold' }}>
             Save Event
           </button>

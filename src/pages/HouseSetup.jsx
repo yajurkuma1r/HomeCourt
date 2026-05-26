@@ -11,20 +11,47 @@ const ProfileSetupModal = ({ user, onClose, onSave, error, setError }) => {
   const [gender, setGender] = useState(user?.gender || '');
   const [phoneNumber, setPhoneNumber] = useState(user?.phoneNumber || '');
   const [profilePicture, setProfilePicture] = useState(user?.profilePicture || '');
+  const [saving, setSaving] = useState(false);
+
+  const resizeProfileImage = (file) =>
+    new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onerror = reject;
+      reader.onload = () => {
+        const image = new Image();
+        image.onerror = reject;
+        image.onload = () => {
+          const maxSize = 512;
+          const scale = Math.min(1, maxSize / Math.max(image.width, image.height));
+          const canvas = document.createElement('canvas');
+          canvas.width = Math.max(1, Math.round(image.width * scale));
+          canvas.height = Math.max(1, Math.round(image.height * scale));
+          const ctx = canvas.getContext('2d');
+          if (!ctx) {
+            reject(new Error('Could not process this image.'));
+            return;
+          }
+          ctx.drawImage(image, 0, 0, canvas.width, canvas.height);
+          resolve(canvas.toDataURL('image/jpeg', 0.78));
+        };
+        image.src = reader.result;
+      };
+      reader.readAsDataURL(file);
+    });
 
   const handleImageChange = (e) => {
     const file = e.target.files[0];
     if (file) {
-      if (file.size > 2 * 1024 * 1024) {
-        setError('Image must be less than 2MB');
+      if (file.size > 8 * 1024 * 1024) {
+        setError('Image must be less than 8MB');
         return;
       }
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setProfilePicture(reader.result);
-        setError('');
-      };
-      reader.readAsDataURL(file);
+      resizeProfileImage(file)
+        .then((dataUrl) => {
+          setProfilePicture(dataUrl);
+          setError('');
+        })
+        .catch(() => setError('Could not process that image.'));
     }
   };
 
@@ -34,14 +61,19 @@ const ProfileSetupModal = ({ user, onClose, onSave, error, setError }) => {
       setError('Name and surname are required.');
       return;
     }
-    await onSave({
-      firstName,
-      lastName,
-      age: parseInt(age, 10) || null,
-      gender,
-      phoneNumber,
-      profilePicture
-    });
+    setSaving(true);
+    try {
+      await onSave({
+        firstName,
+        lastName,
+        age: parseInt(age, 10) || null,
+        gender,
+        phoneNumber,
+        profilePicture
+      });
+    } finally {
+      setSaving(false);
+    }
   };
 
   return (
@@ -110,8 +142,8 @@ const ProfileSetupModal = ({ user, onClose, onSave, error, setError }) => {
             <button type="button" onClick={onClose} style={{ background: 'rgba(255,255,255,0.08)', border: '1px solid var(--border-glass)', color: 'white', borderRadius: '12px', padding: '12px 20px', cursor: 'pointer', fontWeight: 600 }}>
               Cancel
             </button>
-            <button type="submit" className="brand-button" style={{ padding: '12px 24px', borderRadius: '12px', fontSize: '15px', cursor: 'pointer', fontWeight: 700 }}>
-              Save Profile
+            <button type="submit" disabled={saving} className="brand-button" style={{ padding: '12px 24px', borderRadius: '12px', fontSize: '15px', cursor: saving ? 'not-allowed' : 'pointer', fontWeight: 700, opacity: saving ? 0.7 : 1 }}>
+              {saving ? 'Saving...' : 'Save Profile'}
             </button>
           </div>
         </form>
