@@ -29,6 +29,17 @@
   transform-origin: center;
 }
 
+.global-loader-content .homecourt-wordmark__main {
+  letter-spacing: 0.24em;
+  margin-right: -0.24em;
+}
+
+.global-loader-content .homecourt-wordmark small {
+  letter-spacing: 0.18em;
+  margin-right: -0.18em;
+  line-height: 1.45;
+}
+
 .global-loader-spinner-container {
   position: relative;
   width: clamp(54px, 16vw, 80px);
@@ -82,7 +93,7 @@
   }
 
   .global-loader-content .homecourt-brand {
-    transform: scale(0.78);
+    transform: none;
   }
 
   .global-loader-content .homecourt-wordmark__main {
@@ -108,7 +119,7 @@
   }
 
   .global-loader-content .homecourt-brand {
-    transform: scale(0.68);
+    transform: scale(0.9);
   }
 
   .global-loader-spinner-container {

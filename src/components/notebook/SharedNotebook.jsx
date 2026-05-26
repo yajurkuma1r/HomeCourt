@@ -18,6 +18,15 @@ const SharedNotebook = ({ onClose, notebookType = 'main' }) => {
   const [searchPage, setSearchPage] = useState('');
   const [bookmarkName, setBookmarkName] = useState('');
   const [showBookmarkAdd, setShowBookmarkAdd] = useState(false);
+  const [isMobileNotebook, setIsMobileNotebook] = useState(false);
+
+  useEffect(() => {
+    const mediaQuery = window.matchMedia('(max-width: 900px)');
+    const updateMatch = () => setIsMobileNotebook(mediaQuery.matches);
+    updateMatch();
+    mediaQuery.addEventListener('change', updateMatch);
+    return () => mediaQuery.removeEventListener('change', updateMatch);
+  }, []);
   
   useEffect(() => {
     if (!activeHouse?.id) return;
@@ -64,6 +73,10 @@ const SharedNotebook = ({ onClose, notebookType = 'main' }) => {
 
   const handleNextPage = () => {
     if (isFlipping) return;
+    if (isMobileNotebook) {
+      setCurrentPageLeft(prev => prev + 1);
+      return;
+    }
     setIsFlipping('next');
     setTimeout(() => {
       setCurrentPageLeft(prev => prev + 2);
@@ -73,6 +86,10 @@ const SharedNotebook = ({ onClose, notebookType = 'main' }) => {
 
   const handlePrevPage = () => {
     if (isFlipping || currentPageLeft === 0) return;
+    if (isMobileNotebook) {
+      setCurrentPageLeft(prev => Math.max(0, prev - 1));
+      return;
+    }
     setIsFlipping('prev');
     setTimeout(() => {
       setCurrentPageLeft(prev => Math.max(0, prev - 2));
@@ -84,8 +101,8 @@ const SharedNotebook = ({ onClose, notebookType = 'main' }) => {
     if (!pageNum || isNaN(pageNum)) return;
     let targetIndex = parseInt(pageNum, 10) - 1;
     if (targetIndex < 0) targetIndex = 0;
-    // ensure even left page
-    if (targetIndex % 2 !== 0) targetIndex -= 1;
+    // ensure even left page on desktop spreads
+    if (!isMobileNotebook && targetIndex % 2 !== 0) targetIndex -= 1;
     setCurrentPageLeft(targetIndex);
     setSearchPage('');
   };

@@ -84,6 +84,10 @@ iframe {
   transform: scale(0.95);
 }
 
+.house-menu-close {
+  display: none;
+}
+
 /* Common App Layout */
 .app-container {
   display: flex;
@@ -344,6 +348,26 @@ iframe {
     width: 100% !important;
   }
 
+  .house-menu-popover .brand-panel:first-child {
+    position: relative;
+    padding-right: 48px !important;
+  }
+
+  .house-menu-close {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    width: 34px;
+    height: 34px;
+    border: 1px solid var(--border-glass);
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.08);
+    color: white;
+    display: grid;
+    place-items: center;
+    cursor: pointer;
+  }
+
   .current-house-card,
   .members-panel {
     width: 100% !important;
@@ -586,6 +610,10 @@ iframe {
     height: min(72vh, 360px) !important;
   }
 
+  .main-content [style*="height: 100%"] {
+    min-height: 0;
+  }
+
   .main-content [style*="display: flex"][style*="justify-content: space-between"],
   .main-content [style*="display:flex"][style*="justify-content:space-between"] {
     min-width: 0;
@@ -598,6 +626,10 @@ iframe {
   .main-content span,
   .main-content strong {
     overflow-wrap: anywhere;
+  }
+
+  .main-content .shared-notebook-container {
+    width: 100%;
   }
 }
 

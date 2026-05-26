@@ -5,12 +5,14 @@
   display: flex;
   flex-direction: column;
   gap: 24px;
+  min-width: 0;
 }
 
 .notebook-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  gap: 16px;
   padding: 16px 24px;
   border-radius: 16px;
   border-bottom: 1px solid rgba(217, 70, 239, 0.3); /* Magenta accent */
@@ -24,6 +26,7 @@
   perspective: 2000px; /* 3D depth for page flip */
   padding: 20px 0;
   flex: 1;
+  min-width: 0;
 }
 
 .nav-btn {
@@ -172,4 +175,139 @@
 
 .bookmark-item:hover {
   background: rgba(217, 70, 239, 0.2);
+}
+
+@media (max-width: 900px) {
+  .shared-notebook-container {
+    gap: 14px;
+  }
+
+  .notebook-header {
+    flex-direction: column;
+    align-items: stretch;
+    padding: 12px;
+    border-radius: 14px;
+  }
+
+  .notebook-header h2 {
+    justify-content: center;
+    font-size: 17px !important;
+    text-align: center;
+  }
+
+  .notebook-controls {
+    width: 100%;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 8px;
+  }
+
+  .mode-switch {
+    width: 100%;
+    justify-content: center;
+    border-radius: 16px !important;
+  }
+
+  .mode-switch button {
+    flex: 1 1 0;
+    justify-content: center;
+    min-height: 38px;
+    padding: 8px 6px !important;
+    font-size: 12px !important;
+  }
+
+  .notebook-wrapper {
+    display: grid;
+    grid-template-columns: 44px minmax(0, 1fr) 44px;
+    gap: 8px;
+    align-items: center;
+    padding: 0;
+    perspective: none;
+  }
+
+  .notebook-book {
+    grid-column: 2;
+    width: 100%;
+    max-width: 520px;
+    height: auto;
+    min-height: 0;
+    aspect-ratio: 3 / 4;
+    max-height: none;
+    margin: 0 auto;
+    padding: 3px;
+    border-radius: 14px;
+    transform-style: flat;
+  }
+
+  .notebook-page {
+    width: 100%;
+    border-radius: 10px;
+  }
+
+  .right-page,
+  .notebook-spine,
+  .flip-next-anim,
+  .flip-prev-anim {
+    display: none;
+  }
+
+  .left-page {
+    border-radius: 10px;
+  }
+
+  .nav-btn {
+    width: 44px;
+    height: 44px;
+    border-radius: 14px;
+  }
+
+  .prev-btn {
+    grid-column: 1;
+    grid-row: 1;
+  }
+
+  .notebook-wrapper > div:last-child {
+    grid-column: 3;
+    grid-row: 1;
+    display: contents !important;
+  }
+
+  .next-btn {
+    grid-column: 3;
+    grid-row: 1;
+  }
+
+  .bookmarks-panel {
+    grid-column: 1 / -1;
+    grid-row: 2;
+    width: 100%;
+    padding: 12px;
+    border-radius: 14px;
+  }
+
+  .bookmarks-panel > div[style*="max-height"] {
+    max-height: 130px !important;
+  }
+}
+
+@media (max-width: 520px) {
+  .notebook-wrapper {
+    grid-template-columns: 38px minmax(0, 1fr) 38px;
+    gap: 6px;
+  }
+
+  .nav-btn {
+    width: 38px;
+    height: 38px;
+  }
+
+  .nav-btn svg {
+    width: 24px;
+    height: 24px;
+  }
+
+  .notebook-book {
+    aspect-ratio: 0.72;
+  }
 }

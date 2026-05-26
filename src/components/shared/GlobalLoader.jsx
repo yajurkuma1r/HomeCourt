@@ -6,7 +6,7 @@ const GlobalLoader = () => {
   return (
     <div className="global-loader-overlay">
       <div className="global-loader-content">
-        <HomeCourtLogo size={140} showWordmark={true} stacked={true} />
+        <HomeCourtLogo size={96} showWordmark={true} stacked={true} />
         
         <div className="global-loader-spinner-container">
           <div className="global-loader-spinner"></div>

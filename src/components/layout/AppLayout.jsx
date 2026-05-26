@@ -383,6 +383,14 @@ const HouseInfoMenu = (props) => {
         <div className="house-menu-popover" style={{ position: 'absolute', top: '100%', right: 0, marginTop: '12px', zIndex: 100, display: 'flex', flexDirection: 'column', gap: '12px' }}>
           
           <div className="glass-panel brand-panel" style={{ width: '360px', padding: '16px', borderRadius: '18px', textAlign: 'center' }}>
+            <button
+              type="button"
+              className="house-menu-close"
+              onClick={() => setIsOpen(false)}
+              aria-label="Close house info"
+            >
+              <X size={18} />
+            </button>
             <div style={{ fontSize: '12px', letterSpacing: '0.24em', textTransform: 'uppercase', color: 'var(--text-secondary)', marginBottom: '4px' }}>
               Current House
             </div>
