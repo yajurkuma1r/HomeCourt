@@ -302,7 +302,7 @@ const GamesRoom = () => {
   ];
 
   return (
-    <div style={{ height: '100%', display: 'flex', flexDirection: 'column', gap: '24px' }}>
+    <div className="games-room" style={{ height: '100%', display: 'flex', flexDirection: 'column', gap: '24px' }}>
       <div style={{ paddingBottom: '16px', borderBottom: '1px solid var(--border-glass)', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '16px', flexWrap: 'wrap' }}>
         <div>
           <h2 style={{ margin: 0, letterSpacing: '0.08em', fontSize: '22px' }}>GAMEROOM</h2>
@@ -310,7 +310,7 @@ const GamesRoom = () => {
             Play real-time house games together.
           </span>
         </div>
-        <div className="glass-panel" style={{ padding: '6px', borderRadius: '16px', display: 'flex', gap: '6px' }}>
+        <div className="glass-panel games-tabs" style={{ padding: '6px', borderRadius: '16px', display: 'flex', gap: '6px' }}>
           <button
             onClick={() => setActiveGame('uno')}
             style={{ background: activeGame === 'uno' ? 'linear-gradient(135deg, var(--primary), var(--secondary))' : 'transparent', color: 'white', border: 'none', borderRadius: '12px', padding: '10px 14px', fontWeight: 700, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px' }}
@@ -696,19 +696,19 @@ const GamesRoom = () => {
       )}
 
       {activeGame === 'ludo' && (
-        <div style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
+        <div className="game-view-shell" style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
           <LudoGame game={ludoGame} houseId={activeHouse?.id} user={user} />
         </div>
       )}
 
       {activeGame === 'truth_dare' && (
-        <div style={{ flex: 1, display: 'flex', flexDirection: 'column', overflowY: 'auto' }}>
+        <div className="game-view-shell" style={{ flex: 1, display: 'flex', flexDirection: 'column', overflowY: 'auto' }}>
           <TruthDareGame game={truthDareGame} houseId={activeHouse?.id} user={user} />
         </div>
       )}
 
       {activeGame === 'food_draft' && (
-        <div style={{ flex: 1, display: 'flex', flexDirection: 'column', overflowY: 'auto' }}>
+        <div className="game-view-shell" style={{ flex: 1, display: 'flex', flexDirection: 'column', overflowY: 'auto' }}>
           <FoodDraftGame houseId={activeHouse?.id} user={user} />
         </div>
       )}

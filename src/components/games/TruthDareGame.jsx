@@ -99,7 +99,7 @@ const TruthDareGame = ({ game, houseId, user }) => {
   };
 
   return (
-    <div style={{ padding: '16px', display: 'flex', flexDirection: 'column', gap: '16px', height: '100%' }}>
+    <div className="truth-dare-game" style={{ padding: '16px', display: 'flex', flexDirection: 'column', gap: '16px', height: '100%' }}>
       
       {/* Top Header & Actions */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '16px' }}>

@@ -61,6 +61,18 @@ const parseYouTubeVideo = (value) => {
   return null;
 };
 
+const getEffectivePositionSeconds = (mediaState) => {
+  if (!mediaState?.updatedAt) {
+    return Math.max(0, (mediaState?.positionMs || 0) / 1000);
+  }
+
+  const elapsedMs = mediaState.isPlaying
+    ? Date.now() - new Date(mediaState.updatedAt).getTime()
+    : 0;
+
+  return Math.max(0, ((mediaState.positionMs || 0) + Math.max(0, elapsedMs)) / 1000);
+};
+
 const MoviesRoom = () => {
   const { activeHouse, user, getYouTubeMediaState, updateYouTubeMediaState } = useAuth();
   const isAdmin = useMemo(
@@ -152,16 +164,14 @@ const MoviesRoom = () => {
     lastAppliedAtRef.current = mediaState.updatedAt;
 
     const applyState = () => {
-      const effectivePositionMs = mediaState.isPlaying
-        ? mediaState.positionMs + (Date.now() - new Date(mediaState.updatedAt).getTime())
-        : mediaState.positionMs;
+      const effectivePositionSeconds = getEffectivePositionSeconds(mediaState);
 
       if (mediaState.mediaId) {
         const currentVideoId = player.getVideoData?.().video_id;
         if (currentVideoId !== mediaState.mediaId) {
           const nextVideoConfig = {
             videoId: mediaState.mediaId,
-            startSeconds: Math.max(0, effectivePositionMs / 1000)
+            startSeconds: effectivePositionSeconds
           };
 
           if (mediaState.isPlaying) {
@@ -170,7 +180,7 @@ const MoviesRoom = () => {
             player.cueVideoById(nextVideoConfig);
           }
         } else {
-          player.seekTo(Math.max(0, effectivePositionMs / 1000), true);
+          player.seekTo(effectivePositionSeconds, true);
           if (mediaState.isPlaying) {
             player.playVideo();
           } else {
@@ -190,6 +200,39 @@ const MoviesRoom = () => {
       setTimeout(applyState, 500);
     }
   }, [mediaState?.updatedAt, mediaState?.mediaId, mediaState?.isPlaying, mediaState?.positionMs, playerReady]);
+
+  useEffect(() => {
+    const player = playerRef.current;
+    if (!player || !playerReady || !mediaState?.mediaId) {
+      return undefined;
+    }
+
+    const syncInterval = setInterval(() => {
+      const currentVideoId = player.getVideoData?.().video_id;
+      if (currentVideoId !== mediaState.mediaId) {
+        return;
+      }
+
+      const expectedSeconds = getEffectivePositionSeconds(mediaState);
+      const currentSeconds = player.getCurrentTime?.() || 0;
+      const playerState = player.getPlayerState?.();
+      const driftSeconds = Math.abs(currentSeconds - expectedSeconds);
+
+      if (driftSeconds > 1.25) {
+        player.seekTo(expectedSeconds, true);
+      }
+
+      if (mediaState.isPlaying && playerState !== 1) {
+        player.playVideo();
+      }
+
+      if (!mediaState.isPlaying && playerState === 1) {
+        player.pauseVideo();
+      }
+    }, 1500);
+
+    return () => clearInterval(syncInterval);
+  }, [mediaState?.mediaId, mediaState?.isPlaying, mediaState?.positionMs, mediaState?.updatedAt, playerReady]);
 
   const pushState = async (partial) => {
     const player = playerRef.current;

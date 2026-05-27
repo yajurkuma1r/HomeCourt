@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { Routes, Route, Navigate, useNavigate, useLocation } from 'react-router-dom';
 import { Home, MessageSquare, Music, Video, Gamepad2, BookOpen, Phone, LogOut, PlusSquare, Camera, Search, ShieldCheck, UserMinus, Users, X, HelpCircle, Menu } from 'lucide-react';
 
@@ -483,6 +483,7 @@ const ConfirmLogoutModal = ({ onCancel, onConfirm }) => (
 
 const AppLayout = () => {
   const [isCallActive, setIsCallActive] = useState(false);
+  const [incomingCall, setIncomingCall] = useState(null);
   const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
   const [showHelp, setShowHelp] = useState(false);
   const [showLeaveHouseConfirm, setShowLeaveHouseConfirm] = useState(false);
@@ -494,6 +495,7 @@ const AppLayout = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const roomLabel = getRoomLabel(location.pathname);
+  const lastRingAtRef = useRef(0);
 
   const currentRoomPath = useMemo(() => location.pathname, [location.pathname]);
 
@@ -531,6 +533,52 @@ const AppLayout = () => {
     const intervalId = setInterval(loadMembers, 5000);
     return () => clearInterval(intervalId);
   }, [activeHouse?.id, currentRoomPath]);
+
+  useEffect(() => {
+    if (!socket || !activeHouse?.id) {
+      return undefined;
+    }
+
+    const playRing = () => {
+      try {
+        const AudioContext = window.AudioContext || window.webkitAudioContext;
+        if (!AudioContext) return;
+        const context = new AudioContext();
+        [0, 0.18, 0.36].forEach((offset) => {
+          const oscillator = context.createOscillator();
+          const gain = context.createGain();
+          oscillator.type = 'sine';
+          oscillator.frequency.value = 740;
+          gain.gain.setValueAtTime(0.0001, context.currentTime + offset);
+          gain.gain.exponentialRampToValueAtTime(0.14, context.currentTime + offset + 0.02);
+          gain.gain.exponentialRampToValueAtTime(0.0001, context.currentTime + offset + 0.12);
+          oscillator.connect(gain);
+          gain.connect(context.destination);
+          oscillator.start(context.currentTime + offset);
+          oscillator.stop(context.currentTime + offset + 0.14);
+        });
+        setTimeout(() => context.close().catch(() => {}), 850);
+      } catch {}
+    };
+
+    const handleRing = ({ houseId, caller }) => {
+      if (houseId !== activeHouse.id || caller?.userId === user?.id || isCallActive) {
+        return;
+      }
+
+      const now = Date.now();
+      if (now - lastRingAtRef.current < 1200) {
+        return;
+      }
+
+      lastRingAtRef.current = now;
+      setIncomingCall({ caller, receivedAt: now });
+      playRing();
+    };
+
+    socket.on('call:ring', handleRing);
+    return () => socket.off('call:ring', handleRing);
+  }, [socket, activeHouse?.id, user?.id, isCallActive]);
 
   const handleKick = async (memberUserId) => {
     try {
@@ -588,6 +636,37 @@ const AppLayout = () => {
         {memberError ? (
           <div className="glass-panel" style={{ padding: '12px 16px', color: '#fecdd3', borderColor: 'rgba(244,114,182,0.3)', marginBottom: '16px' }}>
             {memberError}
+          </div>
+        ) : null}
+
+        {incomingCall && !isCallActive ? (
+          <div className="glass-panel incoming-call-banner">
+            <div>
+              <strong>{incomingCall.caller?.username || 'Someone'} is calling the house</strong>
+              <div style={{ color: 'var(--text-secondary)', fontSize: '13px', marginTop: '4px' }}>
+                Join the live house call now.
+              </div>
+            </div>
+            <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
+              <button
+                type="button"
+                onClick={() => {
+                  setIncomingCall(null);
+                  setIsCallActive(true);
+                }}
+                className="brand-button"
+                style={{ border: 'none', borderRadius: '12px', color: 'white', padding: '10px 14px', fontWeight: 800, cursor: 'pointer' }}
+              >
+                Join
+              </button>
+              <button
+                type="button"
+                onClick={() => setIncomingCall(null)}
+                style={{ background: 'rgba(255,255,255,0.08)', border: '1px solid var(--border-glass)', borderRadius: '12px', color: 'white', padding: '10px 14px', fontWeight: 700, cursor: 'pointer' }}
+              >
+                Ignore
+              </button>
+            </div>
           </div>
         ) : null}
 

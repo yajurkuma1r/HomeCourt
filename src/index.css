@@ -92,6 +92,17 @@ iframe {
   max-width: calc(100vw - 16px);
 }
 
+.incoming-call-banner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  padding: 14px 16px;
+  margin-bottom: 16px;
+  border-color: rgba(34, 197, 94, 0.35);
+  background: linear-gradient(135deg, rgba(34, 197, 94, 0.12), rgba(255, 45, 160, 0.1));
+}
+
 /* Common App Layout */
 .app-container {
   display: flex;
@@ -460,6 +471,35 @@ iframe {
     grid-template-columns: 1fr !important;
   }
 
+  .games-room {
+    height: auto !important;
+    min-height: 0;
+    gap: 16px !important;
+  }
+
+  .games-tabs {
+    width: 100%;
+    overflow-x: auto;
+    justify-content: flex-start;
+    border-radius: 14px !important;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .games-tabs::-webkit-scrollbar {
+    display: none;
+  }
+
+  .games-tabs button {
+    flex: 0 0 auto;
+    min-height: 42px;
+    white-space: nowrap;
+  }
+
+  .game-view-shell {
+    min-height: 0;
+    overflow: visible !important;
+  }
+
   .games-uno-layout {
     gap: 16px !important;
   }
@@ -492,6 +532,85 @@ iframe {
   .pictionary-side-panel {
     width: 100% !important;
     min-height: 360px;
+  }
+
+  .ludo-game {
+    width: 100%;
+    height: auto !important;
+    min-height: 0;
+    flex-direction: column !important;
+    align-items: stretch !important;
+    justify-content: flex-start !important;
+    gap: 16px !important;
+  }
+
+  .ludo-game--empty {
+    min-height: 340px;
+    justify-content: center !important;
+  }
+
+  .ludo-board {
+    width: min(94vw, 560px) !important;
+    height: min(94vw, 560px) !important;
+    margin: 0 auto;
+    border-radius: 14px !important;
+  }
+
+  .ludo-board svg {
+    width: 100%;
+    height: 100%;
+    display: block;
+  }
+
+  .ludo-controls {
+    width: 100% !important;
+    min-width: 0 !important;
+    padding: 16px !important;
+    gap: 16px !important;
+  }
+
+  .food-draft-game {
+    width: 100%;
+    max-width: 100% !important;
+    padding: 0 !important;
+    gap: 18px !important;
+  }
+
+  .food-draft-grid {
+    grid-template-columns: 1fr !important;
+    gap: 16px !important;
+  }
+
+  .food-draft-game .glass-panel {
+    padding: 16px !important;
+  }
+
+  .food-draft-game form {
+    flex-direction: column;
+  }
+
+  .food-draft-game form button {
+    width: 100% !important;
+    min-height: 44px;
+  }
+
+  .truth-dare-game {
+    height: auto !important;
+    padding: 0 !important;
+    overflow: visible !important;
+  }
+
+  .truth-dare-game > div:first-child {
+    align-items: stretch !important;
+  }
+
+  .truth-dare-game > div:first-child > div:last-child {
+    width: 100%;
+  }
+
+  .truth-dare-game > div:first-child button {
+    flex: 1 1 auto;
+    justify-content: center;
   }
 
   button,
@@ -695,8 +814,25 @@ iframe {
   .floating-call-window {
     width: min(300px, calc(100vw - 18px)) !important;
     max-height: min(430px, calc(100dvh - 96px));
-    overflow-y: auto !important;
+    overflow: hidden !important;
     border-radius: 18px !important;
+  }
+
+  .floating-call-body {
+    overflow-y: auto !important;
+    max-height: calc(min(430px, 100dvh - 96px) - 58px);
+  }
+
+  .floating-call-grid {
+    grid-template-columns: 1fr !important;
+    max-height: 250px !important;
+    overflow-y: auto !important;
+    min-height: 0 !important;
+  }
+
+  .floating-call-controls {
+    gap: 10px !important;
+    justify-content: center !important;
   }
 
   .floating-call-window > div:first-child {
@@ -712,6 +848,16 @@ iframe {
     width: 42px !important;
     height: 42px !important;
     padding: 0 !important;
+  }
+
+  .incoming-call-banner {
+    flex-direction: column;
+    align-items: stretch;
+    padding: 14px;
+  }
+
+  .incoming-call-banner button {
+    flex: 1 1 120px;
   }
 }
 
@@ -821,6 +967,11 @@ iframe {
   }
 
   .main-content [style*="width: 600px"][style*="height: 600px"] {
+    width: min(94vw, 340px) !important;
+    height: min(94vw, 340px) !important;
+  }
+
+  .ludo-board {
     width: min(94vw, 340px) !important;
     height: min(94vw, 340px) !important;
   }

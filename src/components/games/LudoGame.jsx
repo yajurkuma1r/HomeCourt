@@ -90,7 +90,7 @@ const LudoGame = ({ game, houseId, user }) => {
 
   if (!game) {
     return (
-      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '100%', gap: '16px' }}>
+      <div className="ludo-game ludo-game--empty" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '100%', gap: '16px' }}>
         <h3 style={{ color: 'var(--text-secondary)' }}>No Ludo game active</h3>
         <button onClick={joinGame} className="primary-button" style={{ background: 'var(--primary)', color: 'white', padding: '12px 24px', borderRadius: '8px', border: 'none', cursor: 'pointer', fontWeight: 'bold' }}>
           Start Game
@@ -144,9 +144,9 @@ const LudoGame = ({ game, houseId, user }) => {
   const currentPlayer = game.players[game.currentPlayerIndex];
 
   return (
-    <div style={{ display: 'flex', gap: '32px', height: '100%', alignItems: 'center', justifyContent: 'center' }}>
+    <div className="ludo-game" style={{ display: 'flex', gap: '32px', height: '100%', alignItems: 'center', justifyContent: 'center' }}>
       
-      <div style={{ width: '600px', height: '600px', position: 'relative', background: '#0f172a', borderRadius: '16px', overflow: 'hidden', boxShadow: '0 20px 40px rgba(0,0,0,0.4)' }}>
+      <div className="ludo-board" style={{ width: '600px', height: '600px', position: 'relative', background: '#0f172a', borderRadius: '16px', overflow: 'hidden', boxShadow: '0 20px 40px rgba(0,0,0,0.4)' }}>
         <svg width="600" height="600" viewBox="0 0 600 600">
           {squares}
           
@@ -199,7 +199,7 @@ const LudoGame = ({ game, houseId, user }) => {
         </svg>
       </div>
 
-      <div className="glass-panel" style={{ padding: '24px', display: 'flex', flexDirection: 'column', gap: '24px', minWidth: '280px' }}>
+      <div className="glass-panel ludo-controls" style={{ padding: '24px', display: 'flex', flexDirection: 'column', gap: '24px', minWidth: '280px' }}>
         <div>
           <h3 style={{ margin: '0 0 16px 0' }}>Players</h3>
           <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>

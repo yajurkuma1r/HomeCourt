@@ -416,7 +416,7 @@ const FloatingCallWindow = ({ onClose }) => {
         position: 'fixed',
         left: `${position.x}px`,
         top: `${position.y}px`,
-        width: '396px',
+        width: `${getWindowSize().width}px`,
         maxHeight: 'calc(100vh - 24px)',
         zIndex: 1000,
         background:
@@ -467,13 +467,17 @@ const FloatingCallWindow = ({ onClose }) => {
         </div>
       </div>
 
-      <div style={{ padding: '16px', display: 'flex', flexDirection: 'column', gap: '14px' }}>
+      <div className="floating-call-body" style={{ padding: '16px', display: 'flex', flexDirection: 'column', gap: '14px', minHeight: 0, overflowY: 'auto' }}>
         <div
+          className="floating-call-grid"
           style={{
             display: 'grid',
             gridTemplateColumns: remoteUsers.length > 0 ? '1fr 1fr' : '1fr',
             gap: '12px',
-            minHeight: '180px'
+            minHeight: '180px',
+            maxHeight: remoteUsers.length > 2 ? '300px' : 'none',
+            overflowY: remoteUsers.length > 2 ? 'auto' : 'visible',
+            paddingRight: remoteUsers.length > 2 ? '4px' : 0
           }}
         >
           {remoteUsers.map((participant) => (
@@ -519,7 +523,7 @@ const FloatingCallWindow = ({ onClose }) => {
           </div>
         </div>
 
-        <div style={{ display: 'flex', justifyContent: 'center', gap: '14px' }}>
+        <div className="floating-call-controls" style={{ display: 'flex', justifyContent: 'center', gap: '14px', position: 'sticky', bottom: 0, padding: '8px 0 2px', background: 'linear-gradient(180deg, rgba(10,10,18,0), rgba(10,10,18,0.96) 35%)' }}>
           <button
             type="button"
             onClick={() => setMicOn((current) => !current)}

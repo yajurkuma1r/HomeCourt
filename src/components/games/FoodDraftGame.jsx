@@ -63,7 +63,7 @@ const FoodDraftGame = ({ houseId, user }) => {
   const isResult = status === 'result';
 
   return (
-    <div style={{ padding: '24px', maxWidth: '800px', margin: '0 auto', display: 'flex', flexDirection: 'column', gap: '32px' }}>
+    <div className="food-draft-game" style={{ padding: '24px', maxWidth: '800px', margin: '0 auto', display: 'flex', flexDirection: 'column', gap: '32px' }}>
       <div style={{ textAlign: 'center', marginBottom: '16px' }}>
         <h2 style={{ fontSize: '28px', color: '#fca5a5', margin: '0 0 8px 0', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '12px' }}>
           <Utensils size={32} /> Food Draft
@@ -72,7 +72,7 @@ const FoodDraftGame = ({ houseId, user }) => {
       </div>
 
       {status === 'lobby' && (
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '24px' }}>
+        <div className="food-draft-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '24px' }}>
           <div className="glass-panel" style={{ padding: '24px', display: 'flex', flexDirection: 'column', gap: '16px' }}>
             <h3 style={{ margin: 0, color: '#93c5fd' }}>Your Draft Picks ({myDishes.length}/3)</h3>
             <form onSubmit={handleAddDish} style={{ display: 'flex', gap: '8px' }}>

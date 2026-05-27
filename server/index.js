@@ -3688,6 +3688,14 @@ io.on('connection', (socket) => {
     callParticipantsByHouse.set(houseId, participants);
     socket.join(`call:${houseId}`);
     socket.data.joinedCallHouses.add(houseId);
+    socket.to(`house:${houseId}`).emit('call:ring', {
+      houseId,
+      caller: {
+        userId: user.id,
+        username: user.username
+      },
+      sentAt: new Date().toISOString()
+    });
     emitCallParticipants(houseId);
   });
 
