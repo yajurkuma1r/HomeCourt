@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ArrowLeft, Calendar as CalIcon, Plus, Trash2 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
+import { formatLocalDateTime } from '../../dateTime';
 
 const CalendarFeature = () => {
   const navigate = useNavigate();
@@ -125,7 +126,7 @@ const CalendarFeature = () => {
                   <h3 style={{ margin: 0 }}>{event.title}</h3>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
                     <span style={{ color: 'var(--text-secondary)', fontSize: '13px', whiteSpace: 'nowrap' }}>
-                      {new Date(event.date).toLocaleString()}
+                      {formatLocalDateTime(event.date)}
                     </span>
                     <button
                       type="button"

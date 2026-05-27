@@ -1805,7 +1805,7 @@ const server = createServer(async (req, res) => {
 
     if (req.method === 'GET') {
       const events = [...(house.events || [])]
-        .sort((a, b) => new Date(a.date) - new Date(b.date))
+        .sort((a, b) => String(a.date || '').localeCompare(String(b.date || '')))
         .map(createEventPayload);
       json(res, 200, { events });
       return;
@@ -1823,8 +1823,7 @@ const server = createServer(async (req, res) => {
           return;
         }
 
-        const parsedDate = new Date(date);
-        if (Number.isNaN(parsedDate.getTime())) {
+        if (!/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}$/.test(date)) {
           json(res, 400, { error: 'Event date is invalid.' });
           return;
         }
@@ -1833,7 +1832,7 @@ const server = createServer(async (req, res) => {
           id: `event_${crypto.randomUUID().slice(0, 8)}`,
           title,
           message,
-          date: parsedDate.toISOString(),
+          date,
           createdAt: new Date().toISOString(),
           emailNotifiedAt: null,
           createdBy: {
@@ -1923,7 +1922,7 @@ const server = createServer(async (req, res) => {
 
     if (req.method === 'GET') {
       const capsules = [...(house.capsules || [])]
-        .sort((a, b) => new Date(a.unlockAt) - new Date(b.unlockAt))
+        .sort((a, b) => String(a.unlockAt || '').localeCompare(String(b.unlockAt || '')))
         .map(createCapsulePayload);
       json(res, 200, { capsules });
       return;
@@ -1937,13 +1936,12 @@ const server = createServer(async (req, res) => {
         const unlockAt = String(body.unlockAt || '').trim();
         const rawAssets = Array.isArray(body.assets) ? body.assets : [];
 
-        if (!title || !unlockAt) {
-          json(res, 400, { error: 'Capsule title and unlock time are required.' });
+        if (!title || !message || !unlockAt) {
+          json(res, 400, { error: 'Capsule title, message, and unlock time are required.' });
           return;
         }
 
-        const parsedUnlockAt = new Date(unlockAt);
-        if (Number.isNaN(parsedUnlockAt.getTime())) {
+        if (!/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}$/.test(unlockAt)) {
           json(res, 400, { error: 'Unlock time is invalid.' });
           return;
         }
@@ -1962,7 +1960,7 @@ const server = createServer(async (req, res) => {
           id: `capsule_${crypto.randomUUID().slice(0, 8)}`,
           title,
           message,
-          unlockAt: parsedUnlockAt.toISOString(),
+          unlockAt,
           createdAt: new Date().toISOString(),
           emailNotifiedAt: null,
           createdBy: {

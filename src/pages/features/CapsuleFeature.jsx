@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ArrowLeft, Lock, Unlock, Plus, FileImage, FileVideo, Mic, FileText, Trash2 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
+import { formatLocalDateTime, localDateTimeToMs } from '../../dateTime';
 
 const readFileAsDataUrl = (file) =>
   new Promise((resolve, reject) => {
@@ -82,12 +83,15 @@ const CapsuleFeature = () => {
 
   const handleCreate = async (e) => {
     e.preventDefault();
-    if (!newTitle || !unlockDate) return;
+    if (!newTitle.trim() || !newMessage.trim() || !unlockDate) {
+      setError('Capsule title, message, and unlock date are required.');
+      return;
+    }
 
     try {
       await createHouseCapsule(activeHouse.id, {
-        title: newTitle,
-        message: newMessage,
+        title: newTitle.trim(),
+        message: newMessage.trim(),
         unlockAt: unlockDate,
         assets: attachments
       });
@@ -152,11 +156,17 @@ const CapsuleFeature = () => {
 
       {showCreate && (
         <form onSubmit={handleCreate} className="glass-panel" style={{ padding: '24px', marginBottom: '32px', display: 'flex', flexDirection: 'column', gap: '16px', maxWidth: '860px' }}>
-          <input type="text" placeholder="Capsule title" value={newTitle} onChange={(e) => setNewTitle(e.target.value)} style={{ background: 'rgba(0,0,0,0.2)', border: '1px solid var(--border-glass)', padding: '12px', color: 'white', borderRadius: '8px', outline: 'none' }} />
-          <textarea placeholder="Write a note or message for the future" value={newMessage} onChange={(e) => setNewMessage(e.target.value)} style={{ minHeight: '110px', background: 'rgba(0,0,0,0.2)', border: '1px solid var(--border-glass)', padding: '12px', color: 'white', borderRadius: '8px', outline: 'none', fontFamily: 'inherit' }} />
+          <label style={{ display: 'flex', flexDirection: 'column', gap: '8px', color: 'var(--text-secondary)', fontSize: '13px', fontWeight: 700 }}>
+            Capsule title <span style={{ color: '#fda4af' }}>*</span>
+            <input required type="text" placeholder="Capsule title" value={newTitle} onChange={(e) => setNewTitle(e.target.value)} style={{ background: 'rgba(0,0,0,0.2)', border: '1px solid var(--border-glass)', padding: '12px', color: 'white', borderRadius: '8px', outline: 'none' }} />
+          </label>
+          <label style={{ display: 'flex', flexDirection: 'column', gap: '8px', color: 'var(--text-secondary)', fontSize: '13px', fontWeight: 700 }}>
+            Message <span style={{ color: '#fda4af' }}>*</span>
+            <textarea required placeholder="Write a note or message for the future" value={newMessage} onChange={(e) => setNewMessage(e.target.value)} style={{ minHeight: '110px', background: 'rgba(0,0,0,0.2)', border: '1px solid var(--border-glass)', padding: '12px', color: 'white', borderRadius: '8px', outline: 'none', fontFamily: 'inherit' }} />
+          </label>
           <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flexWrap: 'wrap' }}>
-            <label style={{ color: 'var(--text-secondary)', fontSize: '14px' }}>Unlock date & time</label>
-            <input type="datetime-local" value={unlockDate} onChange={(e) => setUnlockDate(e.target.value)} style={{ background: 'rgba(0,0,0,0.2)', border: '1px solid var(--border-glass)', padding: '10px', color: 'white', borderRadius: '8px', outline: 'none' }} />
+            <label style={{ color: 'var(--text-secondary)', fontSize: '14px', fontWeight: 700 }}>Unlock date & time <span style={{ color: '#fda4af' }}>*</span></label>
+            <input required type="datetime-local" value={unlockDate} onChange={(e) => setUnlockDate(e.target.value)} style={{ background: 'rgba(0,0,0,0.2)', border: '1px solid var(--border-glass)', padding: '10px', color: 'white', borderRadius: '8px', outline: 'none' }} />
           </div>
           <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
             <label style={{ color: 'var(--text-secondary)', fontSize: '14px' }}>Add files from your device</label>
@@ -190,7 +200,7 @@ const CapsuleFeature = () => {
           </div>
         ) : (
           capsules.map((capsule) => {
-            const isUnlocked = Date.now() >= new Date(capsule.unlockAt).getTime();
+            const isUnlocked = Date.now() >= localDateTimeToMs(capsule.unlockAt);
             return (
               <div key={capsule.id} className="glass-panel" style={{ padding: '24px', display: 'flex', alignItems: 'flex-start', gap: '20px', background: isUnlocked ? 'rgba(34, 197, 94, 0.1)' : 'var(--bg-glass)' }}>
                 {isUnlocked ? <Unlock size={32} color="#22c55e" /> : <Lock size={32} color="var(--text-secondary)" />}
@@ -199,7 +209,7 @@ const CapsuleFeature = () => {
                     <h3 style={{ margin: 0 }}>{capsule.title}</h3>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
                       <span style={{ color: 'var(--text-secondary)', fontSize: '13px', whiteSpace: 'nowrap' }}>
-                        Unlocks {new Date(capsule.unlockAt).toLocaleString()}
+                        Unlocks {formatLocalDateTime(capsule.unlockAt)}
                       </span>
                       <button
                         type="button"

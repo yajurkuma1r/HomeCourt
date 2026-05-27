@@ -24,9 +24,13 @@ const FloatingCallWindow = ({ onClose }) => {
   const [joining, setJoining] = useState(true);
   const [error, setError] = useState('');
   const isSmallScreen = () => window.innerWidth <= 700;
+  const getWindowSize = () => ({
+    width: isSmallScreen() ? Math.min(300, window.innerWidth - 18) : 396,
+    height: isSmallScreen() ? Math.min(430, window.innerHeight - 96) : 430
+  });
   const getInitialPosition = () =>
     isSmallScreen()
-      ? { x: 12, y: Math.max(12, window.innerHeight - 360) }
+      ? { x: 10, y: Math.max(10, window.innerHeight - getWindowSize().height - 86) }
       : {
           x: Math.max(20, window.innerWidth - 420),
           y: Math.max(20, window.innerHeight - 470)
@@ -198,9 +202,10 @@ const FloatingCallWindow = ({ onClose }) => {
 
   useEffect(() => {
     const handleResize = () => {
+      const size = getWindowSize();
       setPosition((current) => ({
-        x: Math.max(8, Math.min(window.innerWidth - (isSmallScreen() ? 76 : 240), current.x)),
-        y: Math.max(8, Math.min(window.innerHeight - 120, current.y))
+        x: Math.max(8, Math.min(window.innerWidth - size.width - 8, current.x)),
+        y: Math.max(8, Math.min(window.innerHeight - size.height - 8, current.y))
       }));
     };
     window.addEventListener('resize', handleResize);
@@ -332,8 +337,9 @@ const FloatingCallWindow = ({ onClose }) => {
       return;
     }
 
-    const maxX = isSmallScreen() ? window.innerWidth - 76 : window.innerWidth - 240;
-    const maxY = isSmallScreen() ? window.innerHeight - 88 : window.innerHeight - 140;
+    const size = minimized ? { width: 180, height: 64 } : getWindowSize();
+    const maxX = window.innerWidth - size.width - 8;
+    const maxY = window.innerHeight - size.height - 8;
     setPosition({
       x: Math.max(8, Math.min(maxX, event.clientX - offsetRef.current.x)),
       y: Math.max(8, Math.min(maxY, event.clientY - offsetRef.current.y))
@@ -411,6 +417,7 @@ const FloatingCallWindow = ({ onClose }) => {
         left: `${position.x}px`,
         top: `${position.y}px`,
         width: '396px',
+        maxHeight: 'calc(100vh - 24px)',
         zIndex: 1000,
         background:
           'linear-gradient(180deg, rgba(18,18,30,0.98) 0%, rgba(10,10,18,0.98) 100%)',

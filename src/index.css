@@ -649,7 +649,7 @@ iframe {
   }
 
   .study-notebook-panel {
-    order: 2;
+    order: 1;
     min-width: 0 !important;
     width: 100%;
     max-width: 100% !important;
@@ -658,7 +658,7 @@ iframe {
   }
 
   .study-timer-panel {
-    order: 1;
+    order: 2;
     width: 100%;
     gap: 16px !important;
   }
@@ -667,14 +667,12 @@ iframe {
     font-size: clamp(42px, 13vw, 64px) !important;
   }
 
-  .floating-call-window {
-    left: 8px !important;
-    right: 8px !important;
-    top: auto !important;
-    bottom: calc(82px + env(safe-area-inset-bottom)) !important;
-    width: auto !important;
-    max-height: calc(100dvh - 106px);
-    border-radius: 18px !important;
+  .study-notebook-panel .shared-notebook-container {
+    max-height: none;
+  }
+
+  .study-notebook-panel .notebook-book {
+    max-width: min(100%, 360px);
   }
 
   .floating-call-window--minimized {
@@ -690,7 +688,30 @@ iframe {
 
   .floating-call-window video,
   .floating-call-window [style*="min-height: 180px"] {
-    min-height: 160px !important;
+    min-height: 120px !important;
+    max-height: 150px;
+  }
+
+  .floating-call-window {
+    width: min(300px, calc(100vw - 18px)) !important;
+    max-height: min(430px, calc(100dvh - 96px));
+    overflow-y: auto !important;
+    border-radius: 18px !important;
+  }
+
+  .floating-call-window > div:first-child {
+    padding: 10px 12px !important;
+  }
+
+  .floating-call-window > div:last-child {
+    padding: 10px !important;
+    gap: 10px !important;
+  }
+
+  .floating-call-window button.sidebar-icon {
+    width: 42px !important;
+    height: 42px !important;
+    padding: 0 !important;
   }
 }
 
