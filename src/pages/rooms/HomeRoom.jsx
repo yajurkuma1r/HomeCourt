@@ -692,8 +692,8 @@ const HomeRoom = () => {
           </div>
           {storedEvents.length > 0 ? (
             storedEvents.slice(0, 5).map((event) => (
-              <div key={event.id} style={{ display: 'flex', justifyContent: 'space-between', gap: '12px', alignItems: 'flex-start', padding: '10px', borderRadius: '12px', background: 'rgba(255,255,255,0.055)' }}>
-                <div style={{ minWidth: 0 }}>
+              <div key={event.id} className="presence-stored-row" style={{ display: 'flex', justifyContent: 'space-between', gap: '12px', alignItems: 'flex-start', padding: '10px', borderRadius: '12px', background: 'rgba(255,255,255,0.055)' }}>
+                <div className="presence-stored-row__content" style={{ minWidth: 0 }}>
                   <strong style={{ display: 'block', overflowWrap: 'anywhere' }}>{event.title}</strong>
                   <div style={{ color: 'var(--text-secondary)', fontSize: '12px', marginTop: '4px' }}>{formatLocalDateTime(event.date)}</div>
                 </div>
@@ -702,9 +702,11 @@ const HomeRoom = () => {
                   onClick={() => handleDeleteEvent(event.id)}
                   title="Delete event"
                   aria-label="Delete event"
+                  className="presence-delete-button"
                   style={{ flex: '0 0 38px', width: '38px', height: '38px', borderRadius: '12px', border: '1px solid rgba(248,113,113,0.35)', background: 'rgba(239,68,68,0.14)', color: '#fecaca', display: 'grid', placeItems: 'center', cursor: 'pointer' }}
                 >
                   <Trash2 size={16} />
+                  <span>Delete</span>
                 </button>
               </div>
             ))
@@ -720,8 +722,8 @@ const HomeRoom = () => {
           </div>
           {storedCapsules.length > 0 ? (
             storedCapsules.slice(0, 5).map((capsule) => (
-              <div key={capsule.id} style={{ display: 'flex', justifyContent: 'space-between', gap: '12px', alignItems: 'flex-start', padding: '10px', borderRadius: '12px', background: 'rgba(255,255,255,0.055)' }}>
-                <div style={{ minWidth: 0 }}>
+              <div key={capsule.id} className="presence-stored-row" style={{ display: 'flex', justifyContent: 'space-between', gap: '12px', alignItems: 'flex-start', padding: '10px', borderRadius: '12px', background: 'rgba(255,255,255,0.055)' }}>
+                <div className="presence-stored-row__content" style={{ minWidth: 0 }}>
                   <strong style={{ display: 'block', overflowWrap: 'anywhere' }}>{capsule.title}</strong>
                   <div style={{ color: 'var(--text-secondary)', fontSize: '12px', marginTop: '4px' }}>Opens {formatLocalDateTime(capsule.unlockAt)}</div>
                 </div>
@@ -730,9 +732,11 @@ const HomeRoom = () => {
                   onClick={() => handleDeleteCapsule(capsule.id)}
                   title="Delete capsule"
                   aria-label="Delete capsule"
+                  className="presence-delete-button"
                   style={{ flex: '0 0 38px', width: '38px', height: '38px', borderRadius: '12px', border: '1px solid rgba(248,113,113,0.35)', background: 'rgba(239,68,68,0.14)', color: '#fecaca', display: 'grid', placeItems: 'center', cursor: 'pointer' }}
                 >
                   <Trash2 size={16} />
+                  <span>Delete</span>
                 </button>
               </div>
             ))

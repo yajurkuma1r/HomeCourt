@@ -103,6 +103,10 @@ iframe {
   background: linear-gradient(135deg, rgba(34, 197, 94, 0.12), rgba(255, 45, 160, 0.1));
 }
 
+.presence-delete-button span {
+  display: none;
+}
+
 /* Common App Layout */
 .app-container {
   display: flex;
@@ -894,6 +898,36 @@ iframe {
 
   .incoming-call-banner button {
     flex: 1 1 120px;
+  }
+
+  .presence-stored-row {
+    flex-direction: column !important;
+    align-items: stretch !important;
+    gap: 10px !important;
+    padding: 12px !important;
+  }
+
+  .presence-stored-row__content {
+    width: 100% !important;
+  }
+
+  .presence-delete-button {
+    width: 100% !important;
+    height: 42px !important;
+    flex: 0 0 auto !important;
+    display: flex !important;
+    place-items: initial !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 8px !important;
+    border-radius: 12px !important;
+    background: rgba(239, 68, 68, 0.22) !important;
+    color: #fecaca !important;
+    font-weight: 800 !important;
+  }
+
+  .presence-delete-button span {
+    display: inline !important;
   }
 
   .main-content .games-room {
