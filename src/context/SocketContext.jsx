@@ -13,6 +13,7 @@ export const SocketProvider = ({ children }) => {
   const [connected, setConnected] = useState(false);
   const [callParticipants, setCallParticipants] = useState([]);
   const [footprints, setFootprints] = useState([]);
+  const [activityNotification, setActivityNotification] = useState(null);
   const [presenceVersion, setPresenceVersion] = useState(0);
   const socketRef = useRef(null);
   const latestHouseIdRef = useRef(null);
@@ -24,6 +25,7 @@ export const SocketProvider = ({ children }) => {
       socketRef.current = null;
       setConnected(false);
       setCallParticipants([]);
+      setActivityNotification(null);
       return undefined;
     }
 
@@ -48,6 +50,11 @@ export const SocketProvider = ({ children }) => {
     socket.on('house:footprints-updated', ({ houseId, footprints }) => {
       if (houseId === latestHouseIdRef.current) {
         setFootprints(footprints || []);
+      }
+    });
+    socket.on('house:activity', (activity) => {
+      if (activity?.houseId === latestHouseIdRef.current) {
+        setActivityNotification(activity);
       }
     });
     socket.on('polaroid:new', () => {
@@ -75,6 +82,7 @@ export const SocketProvider = ({ children }) => {
       socketRef.current = null;
       setConnected(false);
       setCallParticipants([]);
+      setActivityNotification(null);
     };
   }, [user?.id]);
 
@@ -90,6 +98,7 @@ export const SocketProvider = ({ children }) => {
     if (previousHouseId && previousHouseId !== nextHouseId) {
       socket.emit('house:leave', { houseId: previousHouseId });
       setCallParticipants([]);
+      setActivityNotification(null);
     }
 
     if (nextHouseId && previousHouseId !== nextHouseId) {
@@ -105,9 +114,10 @@ export const SocketProvider = ({ children }) => {
       connected,
       callParticipants,
       footprints,
+      activityNotification,
       presenceVersion
     }),
-    [connected, callParticipants, footprints, presenceVersion]
+    [connected, callParticipants, footprints, activityNotification, presenceVersion]
   );
 
   return <SocketContext.Provider value={value}>{children}</SocketContext.Provider>;

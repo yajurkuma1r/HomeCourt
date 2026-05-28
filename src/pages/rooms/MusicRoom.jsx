@@ -1,6 +1,7 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { ListMusic, Music2, Play, ShieldCheck } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
+import { useSocket } from '../../context/SocketContext';
 
 const loadSpotifyApi = () =>
   new Promise((resolve) => {
@@ -50,6 +51,7 @@ const parseSpotifySource = (value) => {
 
 const MusicRoom = () => {
   const { activeHouse, user, getSpotifyMediaState, updateSpotifyMediaState } = useAuth();
+  const { socket } = useSocket();
   const isAdmin = useMemo(
     () => activeHouse?.members?.find((member) => member.userId === user?.id)?.role === 'admin',
     [activeHouse?.members, user?.id]
@@ -88,6 +90,21 @@ const MusicRoom = () => {
 
     return () => clearInterval(intervalId);
   }, [activeHouse?.id]);
+
+  useEffect(() => {
+    if (!socket || !activeHouse?.id) {
+      return undefined;
+    }
+
+    const handleSpotifyUpdate = ({ houseId, media }) => {
+      if (houseId === activeHouse.id) {
+        setSpotifyState(media);
+      }
+    };
+
+    socket.on('spotify:media-updated', handleSpotifyUpdate);
+    return () => socket.off('spotify:media-updated', handleSpotifyUpdate);
+  }, [socket, activeHouse?.id]);
 
   useEffect(() => {
     let disposed = false;

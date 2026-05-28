@@ -1911,6 +1911,12 @@ const server = createServer(async (req, res) => {
         db.houses[houseIndex] = updatedHouse;
         writeDb(db);
         io.to(`house:${eventsHouseId}`).emit('house:calendar-updated', { houseId: eventsHouseId });
+        emitHouseActivity(
+          eventsHouseId,
+          user,
+          withActivityDetail(`${user.username} scheduled an event`, event.title),
+          'event'
+        );
         json(res, 201, { event: createEventPayload(event) });
       } catch (error) {
         json(res, 400, { error: error.message || 'Could not create event.' });
@@ -2040,6 +2046,12 @@ const server = createServer(async (req, res) => {
         db.houses[houseIndex] = updatedHouse;
         writeDb(db);
         io.to(`house:${capsulesHouseId}`).emit('house:capsules-updated', { houseId: capsulesHouseId });
+        emitHouseActivity(
+          capsulesHouseId,
+          user,
+          withActivityDetail(`${user.username} scheduled a capsule`, capsule.title),
+          'capsule'
+        );
         json(res, 201, { capsule: createCapsulePayload(capsule) });
       } catch (error) {
         json(res, 400, { error: error.message || 'Could not create capsule.' });
@@ -2170,6 +2182,12 @@ const server = createServer(async (req, res) => {
 
       db.houses[houseIndex] = updatedHouse;
       writeDb(db);
+      emitHouseActivity(
+        vaultFoldersHouseId,
+        user,
+        withActivityDetail(`${user.username} added a vault folder`, folder.name),
+        'vault'
+      );
       json(res, 201, createVaultFolderPayload(folder));
     } catch (error) {
       json(res, 400, { error: error.message || 'Could not create folder.' });
@@ -2280,6 +2298,12 @@ const server = createServer(async (req, res) => {
 
       db.houses[houseIndex] = updatedHouse;
       writeDb(db);
+      emitHouseActivity(
+        vaultItemsHouseId,
+        user,
+        withActivityDetail(`${user.username} added a vault item`, item.title),
+        'vault'
+      );
       json(res, 201, createVaultItemPayload(item));
     } catch (error) {
       json(res, 400, { error: error.message || 'Could not save vault item.' });
@@ -2398,6 +2422,7 @@ const server = createServer(async (req, res) => {
 
         db.houses[houseIndex] = updatedHouse;
         writeDb(db);
+        emitHouseActivity(messagesHouseId, user, `${user.username} sent a chat`, 'chat');
         json(res, 201, createMessagePayload(message));
       } catch (error) {
         json(res, 400, { error: error.message || 'Could not send message.' });
@@ -2506,10 +2531,18 @@ const server = createServer(async (req, res) => {
 
         db.houses[houseIndex] = updatedHouse;
         writeDb(db);
-        io.to(`house:${youtubeMediaHouseId}`).emit('youtube:media-updated', {
-          houseId: youtubeMediaHouseId,
+        io.to(`house:${spotifyMediaHouseId}`).emit('spotify:media-updated', {
+          houseId: spotifyMediaHouseId,
           media: createMediaStatePayload(nextState)
         });
+        if (action === 'play-now' && nextState.mediaId) {
+          emitHouseActivity(
+            spotifyMediaHouseId,
+            user,
+            withActivityDetail(`${user.username} started music`, nextState.title),
+            'music'
+          );
+        }
         json(res, 200, { media: createMediaStatePayload(nextState) });
       } catch (error) {
         json(res, 400, { error: error.message || 'Could not update Spotify state.' });
@@ -2579,6 +2612,21 @@ const server = createServer(async (req, res) => {
 
         db.houses[houseIndex] = updatedHouse;
         writeDb(db);
+        const currentYouTubeState = house.media?.youtube || createEmptyYouTubeState();
+        io.to(`house:${youtubeMediaHouseId}`).emit('youtube:media-updated', {
+          houseId: youtubeMediaHouseId,
+          media: createMediaStatePayload(nextState)
+        });
+        const startedNewMovie = nextState.mediaId && nextState.mediaId !== currentYouTubeState.mediaId;
+        const resumedMovie = nextState.mediaId && !currentYouTubeState.isPlaying && nextState.isPlaying;
+        if (startedNewMovie || resumedMovie) {
+          emitHouseActivity(
+            youtubeMediaHouseId,
+            user,
+            withActivityDetail(`${user.username} started a movie`, nextState.title),
+            'movie'
+          );
+        }
         json(res, 200, { media: createMediaStatePayload(nextState) });
       } catch (error) {
         json(res, 400, { error: error.message || 'Could not update YouTube state.' });
@@ -2749,6 +2797,9 @@ const server = createServer(async (req, res) => {
 
         db.houses[houseIndex] = updatedHouse;
         writeDb(db);
+        if (action === 'start-round') {
+          emitHouseActivity(pictionaryHouseId, user, `${user.username} started Pictionary`, 'game');
+        }
         json(res, 200, {
           game: createPictionaryPayload(nextGameState, updatedHouse, user.id)
         });
@@ -2965,6 +3016,9 @@ const server = createServer(async (req, res) => {
 
         db.houses[houseIndex] = updatedHouse;
         writeDb(db);
+        if (action === 'start-game' || action === 'reset-game') {
+          emitHouseActivity(unoHouseId, user, `${user.username} started UNO`, 'game');
+        }
         json(res, 200, {
           game: createUnoPayload(nextGameState, updatedHouse, user.id)
         });
@@ -3121,6 +3175,9 @@ const server = createServer(async (req, res) => {
 
         db.houses[houseIndex] = updatedHouse;
         writeDb(db);
+        if (action === 'start-selection') {
+          emitHouseActivity(truthDareHouseId, user, `${user.username} started Truth or Dare`, 'game');
+        }
         json(res, 200, {
           game: createTruthDarePayload(nextGameState)
         });
@@ -3382,6 +3439,7 @@ const callHouseId = parseHouseRoute(req.url, 'call');
           snap: createShowroomSnapPayload(snap, user.id),
           senderUserId: user.id
         });
+        emitHouseActivity(showroomHouseId, user, `${user.username} sent a snap`, 'showroom');
         json(res, 201, { snap: createShowroomSnapPayload(snap, user.id) });
       } catch (error) {
         json(res, 400, { error: error.message || 'Could not send the snap.' });
@@ -3496,6 +3554,32 @@ const userSocketIds = new Map();
 const callParticipantsByHouse = new Map();
 const screenSharesByHouse = new Map();
 const footprintsByHouse = new Map();
+
+const trimActivityDetail = (value, maxLength = 52) => {
+  const text = String(value || '').trim().replace(/\s+/g, ' ');
+  if (!text) return '';
+  return text.length > maxLength ? `${text.slice(0, maxLength - 1)}...` : text;
+};
+
+const withActivityDetail = (message, detail) => {
+  const shortDetail = trimActivityDetail(detail);
+  return shortDetail ? `${message}: ${shortDetail}` : message;
+};
+
+const emitHouseActivity = (houseId, actor, message, type = 'activity') => {
+  if (!houseId || !actor || !message) return;
+  io.to(`house:${houseId}`).emit('house:activity', {
+    id: `activity_${Date.now()}_${crypto.randomUUID().slice(0, 6)}`,
+    houseId,
+    type,
+    message,
+    actor: {
+      userId: actor.id || actor.userId,
+      username: actor.username
+    },
+    createdAt: new Date().toISOString()
+  });
+};
 
 const trackSocketForUser = (userId, socketId) => {
   const current = userSocketIds.get(userId) || new Set();
@@ -3695,6 +3779,13 @@ io.on('connection', (socket) => {
     socket.leave(`house:${houseId}`);
     socket.data.joinedHouses.delete(houseId);
     socket.data.currentRooms.delete(houseId);
+    emitHouseActivity(houseId, user, `${user.username} exited the house session`, 'session');
+    io.to(`house:${houseId}`).emit('house:presence-updated', { houseId });
+  });
+
+  socket.on('house:session-exit', ({ houseId }) => {
+    if (!socket.data.joinedHouses.has(houseId)) return;
+    emitHouseActivity(houseId, user, `${user.username} exited the house session`, 'session');
     io.to(`house:${houseId}`).emit('house:presence-updated', { houseId });
   });
 
@@ -3753,6 +3844,9 @@ io.on('connection', (socket) => {
     callParticipantsByHouse.set(houseId, participants);
     socket.join(`call:${houseId}`);
     socket.data.joinedCallHouses.add(houseId);
+    if (!existing && participants.size === 1) {
+      emitHouseActivity(houseId, user, `${user.username} started a call`, 'call');
+    }
     socket.to(`house:${houseId}`).emit('call:ring', {
       houseId,
       caller: {
@@ -3912,6 +4006,7 @@ io.on('connection', (socket) => {
     const house = db.houses.find(h => h.id === houseId);
     if (!house) return;
 
+    const createdLudoGame = !house.ludoGame;
     if (!house.ludoGame) {
       house.ludoGame = {
         players: [
@@ -3942,6 +4037,9 @@ io.on('connection', (socket) => {
         emptySlot.userId = user.id;
         emptySlot.username = user.username;
         writeDb(db);
+        if (createdLudoGame) {
+          emitHouseActivity(houseId, user, `${user.username} started Ludo`, 'game');
+        }
         io.to(`house:${houseId}`).emit('ludo:state', house.ludoGame);
       }
     }
@@ -4115,6 +4213,7 @@ io.on('connection', (socket) => {
     
     writeDb(db);
     io.to(`house:${houseId}`).emit('food-draft:state', house.foodDraftGame);
+    emitHouseActivity(houseId, user, `${user.username} started Food Draft`, 'game');
     
     // Auto complete spin after a few seconds
     setTimeout(() => {
@@ -4197,6 +4296,7 @@ io.on('connection', (socket) => {
     
     writeDb(db);
     io.to(`house:${houseId}`).emit('polaroid:new', { houseId, polaroid: newPolaroid });
+    emitHouseActivity(houseId, user, `${user.username} sent a polaroid`, 'polaroid');
     ack?.({ ok: true, polaroid: newPolaroid });
   });
 

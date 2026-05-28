@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { Routes, Route, Navigate, useNavigate, useLocation } from 'react-router-dom';
-import { Home, MessageSquare, Music, Video, Gamepad2, BookOpen, Phone, LogOut, PlusSquare, Camera, Search, ShieldCheck, UserMinus, Users, X, HelpCircle, Menu } from 'lucide-react';
+import { Home, MessageSquare, Music, Video, Gamepad2, BookOpen, Phone, LogOut, PlusSquare, Camera, Search, ShieldCheck, UserMinus, Users, X, HelpCircle, Menu, Bell } from 'lucide-react';
 
 import FloatingCallWindow from '../shared/FloatingCallWindow';
 import HomeCourtLogo from '../shared/HomeCourtLogo';
@@ -481,6 +481,36 @@ const ConfirmLogoutModal = ({ onCancel, onConfirm }) => (
   </div>
 );
 
+const ActivityFloater = ({ activity }) => {
+  const [visibleActivity, setVisibleActivity] = useState(null);
+
+  useEffect(() => {
+    if (!activity?.id || !activity?.message) {
+      return undefined;
+    }
+
+    setVisibleActivity(activity);
+    const timeoutId = setTimeout(() => {
+      setVisibleActivity((current) => (current?.id === activity.id ? null : current));
+    }, 4000);
+
+    return () => clearTimeout(timeoutId);
+  }, [activity?.id]);
+
+  if (!visibleActivity) {
+    return null;
+  }
+
+  return (
+    <div className="activity-floater" role="status" aria-live="polite">
+      <div className="activity-floater__icon">
+        <Bell size={15} />
+      </div>
+      <div className="activity-floater__message">{visibleActivity.message}</div>
+    </div>
+  );
+};
+
 const AppLayout = () => {
   const [isCallActive, setIsCallActive] = useState(false);
   const [incomingCall, setIncomingCall] = useState(null);
@@ -491,7 +521,7 @@ const AppLayout = () => {
   const [memberQuery, setMemberQuery] = useState('');
   const [memberError, setMemberError] = useState('');
   const { activeHouse, user, logout, getHouseMembers, kickHouseMember, promoteHouseMember, refreshHouses } = useAuth();
-  const { socket, connected, presenceVersion, footprints } = useSocket();
+  const { socket, connected, presenceVersion, footprints, activityNotification } = useSocket();
   const location = useLocation();
   const navigate = useNavigate();
   const roomLabel = getRoomLabel(location.pathname);
@@ -639,6 +669,8 @@ const AppLayout = () => {
           </div>
         ) : null}
 
+        <ActivityFloater activity={activityNotification} />
+
         {incomingCall && !isCallActive ? (
           <div className="glass-panel incoming-call-banner">
             <div>
@@ -686,7 +718,7 @@ const AppLayout = () => {
                 <button onClick={() => setShowLeaveHouseConfirm(false)} style={{ background: 'rgba(255,255,255,0.08)', border: '1px solid var(--border-glass)', color: 'white', borderRadius: '12px', padding: '10px 14px', cursor: 'pointer' }}>
                   Cancel
                 </button>
-                <button onClick={() => { setShowLeaveHouseConfirm(false); navigate('/setup'); }} style={{ background: '#ef4444', border: 'none', color: 'white', borderRadius: '12px', padding: '10px 14px', fontWeight: 700, cursor: 'pointer' }}>
+                <button onClick={() => { socket?.emit('house:session-exit', { houseId: activeHouse?.id }); setShowLeaveHouseConfirm(false); navigate('/setup'); }} style={{ background: '#ef4444', border: 'none', color: 'white', borderRadius: '12px', padding: '10px 14px', fontWeight: 700, cursor: 'pointer' }}>
                   Exit Session
                 </button>
               </div>
