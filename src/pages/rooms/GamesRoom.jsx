@@ -359,7 +359,7 @@ const GamesRoom = () => {
 
           <div className="games-uno-layout" style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1fr) 340px', gap: '24px', flex: 1, minHeight: 0 }}>
             <div className="glass-panel uno-table-panel" style={{ minHeight: '650px', padding: '20px', display: 'flex', flexDirection: 'column', gap: '20px' }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', gap: '16px', alignItems: 'center', flexWrap: 'wrap' }}>
+              <div className="uno-table-header" style={{ display: 'flex', justifyContent: 'space-between', gap: '16px', alignItems: 'center', flexWrap: 'wrap' }}>
                 <div>
                   <h3 style={{ margin: 0, fontSize: '22px' }}>UNO Table</h3>
                   <div style={{ color: 'var(--text-secondary)', marginTop: '4px', fontSize: '14px' }}>
@@ -393,7 +393,7 @@ const GamesRoom = () => {
               </div>
 
               <div className="uno-board-grid" style={{ flex: 1, display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '18px', alignItems: 'center' }}>
-                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '12px' }}>
+                <div className="uno-zone uno-card-pile" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '12px' }}>
                   <div style={{ color: 'var(--text-secondary)', fontSize: '13px', textTransform: 'uppercase', letterSpacing: '0.08em' }}>Draw pile</div>
                   <button
                     onClick={() => handleUnoAction({ action: 'draw-card' })}
@@ -405,9 +405,9 @@ const GamesRoom = () => {
                   <span style={{ color: 'var(--text-secondary)', fontSize: '13px' }}>{unoGame?.deckCount || 0} cards</span>
                 </div>
 
-                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '12px' }}>
+                <div className="uno-zone uno-discard-pile" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '12px' }}>
                   <div style={{ color: 'var(--text-secondary)', fontSize: '13px', textTransform: 'uppercase', letterSpacing: '0.08em' }}>Discard</div>
-                  <div style={{ width: '128px', height: '184px', padding: '14px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '32px', fontWeight: 900, textAlign: 'center', ...getUnoCardStyle(unoGame?.topCard) }}>
+                  <div className="uno-discard-card" style={{ width: '128px', height: '184px', padding: '14px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '32px', fontWeight: 900, textAlign: 'center', ...getUnoCardStyle(unoGame?.topCard) }}>
                     {formatUnoCard(unoGame?.topCard)}
                   </div>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: 'var(--text-secondary)', fontSize: '13px' }}>
@@ -417,7 +417,7 @@ const GamesRoom = () => {
                   </div>
                 </div>
 
-                <div className="glass-panel" style={{ padding: '16px', borderRadius: '18px', display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                <div className="glass-panel uno-zone uno-turn-log" style={{ padding: '16px', borderRadius: '18px', display: 'flex', flexDirection: 'column', gap: '12px' }}>
                   <div style={{ color: 'var(--text-secondary)', fontSize: '13px', textTransform: 'uppercase', letterSpacing: '0.08em' }}>Turn log</div>
                   <strong style={{ lineHeight: 1.4 }}>{unoGame?.message || 'No match running yet.'}</strong>
                   <div style={{ color: 'var(--text-secondary)', fontSize: '13px' }}>
@@ -434,7 +434,7 @@ const GamesRoom = () => {
                 </div>
               </div>
 
-              <div>
+              <div className="uno-hand-section">
                 <div style={{ display: 'flex', justifyContent: 'space-between', gap: '12px', alignItems: 'center', marginBottom: '12px', flexWrap: 'wrap' }}>
                   <div>
                     <strong>Your hand</strong>

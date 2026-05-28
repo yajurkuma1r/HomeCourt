@@ -895,6 +895,137 @@ iframe {
   .incoming-call-banner button {
     flex: 1 1 120px;
   }
+
+  .main-content .games-room {
+    display: block !important;
+    width: 100% !important;
+    max-width: 100vw !important;
+    padding-bottom: calc(92px + env(safe-area-inset-bottom)) !important;
+    overflow: visible !important;
+  }
+
+  .main-content .games-room > div:first-child {
+    align-items: stretch !important;
+  }
+
+  .main-content .games-uno-layout {
+    display: flex !important;
+    flex-direction: column !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    min-height: 0 !important;
+    overflow: visible !important;
+    gap: 12px !important;
+  }
+
+  .main-content .uno-table-panel {
+    width: 100% !important;
+    min-width: 0 !important;
+    max-width: 100% !important;
+    min-height: 0 !important;
+    padding: 12px !important;
+    gap: 14px !important;
+    overflow: visible !important;
+    border-radius: 16px !important;
+  }
+
+  .main-content .uno-table-header {
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: stretch !important;
+    gap: 12px !important;
+  }
+
+  .main-content .uno-actions {
+    display: grid !important;
+    grid-template-columns: 1fr !important;
+    gap: 8px !important;
+  }
+
+  .main-content .uno-actions button {
+    width: 100% !important;
+    min-height: 44px;
+    justify-content: center;
+  }
+
+  .main-content .uno-board-grid {
+    display: grid !important;
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    gap: 10px !important;
+    align-items: stretch !important;
+    flex: 0 0 auto !important;
+  }
+
+  .main-content .uno-zone {
+    min-width: 0 !important;
+    width: 100% !important;
+    padding: 10px !important;
+    border-radius: 14px !important;
+    background: rgba(255, 255, 255, 0.045);
+  }
+
+  .main-content .uno-turn-log {
+    grid-column: 1 / -1 !important;
+  }
+
+  .main-content .uno-card-pile button {
+    width: clamp(82px, 29vw, 108px) !important;
+    height: clamp(120px, 42vw, 156px) !important;
+    font-size: clamp(20px, 7vw, 26px) !important;
+    border-radius: 14px !important;
+  }
+
+  .main-content .uno-discard-card {
+    width: clamp(88px, 31vw, 116px) !important;
+    height: clamp(126px, 44vw, 164px) !important;
+    font-size: clamp(20px, 7vw, 28px) !important;
+    padding: 10px !important;
+    border-radius: 14px !important;
+  }
+
+  .main-content .uno-hand-section {
+    width: 100% !important;
+    min-width: 0 !important;
+    overflow: hidden !important;
+  }
+
+  .main-content .uno-hand {
+    width: calc(100% + 24px) !important;
+    max-width: calc(100% + 24px) !important;
+    margin: 0 -12px !important;
+    padding: 4px 12px 16px !important;
+    overflow-x: auto !important;
+    overflow-y: hidden !important;
+    scroll-snap-type: x mandatory;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .main-content .uno-hand button {
+    flex: 0 0 clamp(66px, 22vw, 82px) !important;
+    min-width: clamp(66px, 22vw, 82px) !important;
+    width: clamp(66px, 22vw, 82px) !important;
+    height: clamp(98px, 32vw, 120px) !important;
+    padding: 8px !important;
+    font-size: clamp(17px, 6vw, 24px) !important;
+    border-radius: 13px !important;
+    scroll-snap-align: start;
+  }
+
+  .main-content .uno-players-panel {
+    width: 100% !important;
+    max-width: 100% !important;
+    padding: 12px !important;
+    gap: 10px !important;
+    overflow: visible !important;
+  }
+
+  .main-content .uno-player-card {
+    width: 100% !important;
+    min-width: 0 !important;
+    padding: 10px !important;
+  }
 }
 
 @media (max-width: 520px) {
