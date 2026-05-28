@@ -3711,7 +3711,7 @@ io.on('connection', (socket) => {
       const houseFootprints = footprintsByHouse.get(houseId) || [];
       const now = Date.now();
       const validFootprints = houseFootprints.filter(f => now - f.timestamp < 3 * 60 * 1000);
-      const filtered = validFootprints.filter(f => f.userId !== user.id || f.path !== currentRoom);
+      const filtered = validFootprints.filter(f => f.userId !== user.id);
       filtered.push({ userId: user.id, username: user.username, path: currentRoom, timestamp: now });
       footprintsByHouse.set(houseId, filtered);
       io.to(`house:${houseId}`).emit('house:footprints-updated', { houseId, footprints: filtered });

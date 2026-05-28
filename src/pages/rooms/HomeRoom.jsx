@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { Calendar, Image as ImageIcon, Gift, MapPin, Users, Compass, Video, Music, BookOpen, Monitor, Pin, Trash2 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { useSocket } from '../../context/SocketContext';
-import { formatLocalDateTime, localDateTimeToMs } from '../../dateTime';
+import { localDateTimeToMs } from '../../dateTime';
 
 const ResumeSessionCard = ({ session, navigate }) => {
   const formatTime = (ms) => {
@@ -123,9 +123,7 @@ const HomeRoom = () => {
     getSpotifyMediaState,
     getYouTubeMediaState,
     getHouseEvents,
-    deleteHouseEvent,
     getHouseCapsules,
-    deleteHouseCapsule,
     getVault
   } = useAuth();
   const { socket, footprints } = useSocket();
@@ -157,8 +155,6 @@ const HomeRoom = () => {
   const [sessions, setSessions] = useState([]);
   const [recentSessions, setRecentSessions] = useState([]);
   const [stats, setStats] = useState({ scheduledEvents: 0, liveEvents: 0, scheduledCapsules: 0, liveCapsules: 0, onThisDay: 0 });
-  const [storedEvents, setStoredEvents] = useState([]);
-  const [storedCapsules, setStoredCapsules] = useState([]);
   const [dashboardError, setDashboardError] = useState('');
   const [currentTime, setCurrentTime] = useState(() => Date.now());
 
@@ -245,8 +241,6 @@ const HomeRoom = () => {
         liveCapsules: liveCapsulesCount,
         onThisDay: onThisDayCount
       });
-      setStoredEvents(eventsList);
-      setStoredCapsules(capsulesList);
       setDashboardError('');
       const active = [];
       const recent = [];
@@ -320,28 +314,6 @@ const HomeRoom = () => {
       setDashboardError(error.message || 'Could not refresh Presence Room data.');
     }
   }, [activeHouse?.id, getHouseEvents, getHouseCapsules, getVault, getHouseMembers, getSpotifyMediaState, getYouTubeMediaState]);
-
-  const handleDeleteEvent = async (eventId) => {
-    if (!activeHouse?.id || !eventId) return;
-    try {
-      await deleteHouseEvent(activeHouse.id, eventId);
-      await fetchSessions();
-      setDashboardError('');
-    } catch (error) {
-      setDashboardError(error.message || 'Could not delete event.');
-    }
-  };
-
-  const handleDeleteCapsule = async (capsuleId) => {
-    if (!activeHouse?.id || !capsuleId) return;
-    try {
-      await deleteHouseCapsule(activeHouse.id, capsuleId);
-      await fetchSessions();
-      setDashboardError('');
-    } catch (error) {
-      setDashboardError(error.message || 'Could not delete capsule.');
-    }
-  };
 
   useEffect(() => {
     fetchSessions();
@@ -684,67 +656,6 @@ const HomeRoom = () => {
         </div>
       </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '14px', maxWidth: '1000px', width: '100%', margin: '0 auto 8px' }}>
-        <div className="glass-panel" style={{ padding: '16px', display: 'flex', flexDirection: 'column', gap: '12px' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-            <Calendar size={18} color="var(--primary)" />
-            <h3 style={{ margin: 0 }}>Stored House Events</h3>
-          </div>
-          {storedEvents.length > 0 ? (
-            storedEvents.slice(0, 5).map((event) => (
-              <div key={event.id} className="presence-stored-row" style={{ display: 'flex', justifyContent: 'space-between', gap: '12px', alignItems: 'flex-start', padding: '10px', borderRadius: '12px', background: 'rgba(255,255,255,0.055)' }}>
-                <div className="presence-stored-row__content" style={{ minWidth: 0 }}>
-                  <strong style={{ display: 'block', overflowWrap: 'anywhere' }}>{event.title}</strong>
-                  <div style={{ color: 'var(--text-secondary)', fontSize: '12px', marginTop: '4px' }}>{formatLocalDateTime(event.date)}</div>
-                </div>
-                <button
-                  type="button"
-                  onClick={() => handleDeleteEvent(event.id)}
-                  title="Delete event"
-                  aria-label="Delete event"
-                  className="presence-delete-button"
-                  style={{ flex: '0 0 38px', width: '38px', height: '38px', borderRadius: '12px', border: '1px solid rgba(248,113,113,0.35)', background: 'rgba(239,68,68,0.14)', color: '#fecaca', display: 'grid', placeItems: 'center', cursor: 'pointer' }}
-                >
-                  <Trash2 size={16} />
-                  <span>Delete</span>
-                </button>
-              </div>
-            ))
-          ) : (
-            <div style={{ color: 'var(--text-secondary)', fontSize: '14px' }}>No stored events yet.</div>
-          )}
-        </div>
-
-        <div className="glass-panel" style={{ padding: '16px', display: 'flex', flexDirection: 'column', gap: '12px' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-            <Gift size={18} color="#22c55e" />
-            <h3 style={{ margin: 0 }}>Stored Surprise Capsules</h3>
-          </div>
-          {storedCapsules.length > 0 ? (
-            storedCapsules.slice(0, 5).map((capsule) => (
-              <div key={capsule.id} className="presence-stored-row" style={{ display: 'flex', justifyContent: 'space-between', gap: '12px', alignItems: 'flex-start', padding: '10px', borderRadius: '12px', background: 'rgba(255,255,255,0.055)' }}>
-                <div className="presence-stored-row__content" style={{ minWidth: 0 }}>
-                  <strong style={{ display: 'block', overflowWrap: 'anywhere' }}>{capsule.title}</strong>
-                  <div style={{ color: 'var(--text-secondary)', fontSize: '12px', marginTop: '4px' }}>Opens {formatLocalDateTime(capsule.unlockAt)}</div>
-                </div>
-                <button
-                  type="button"
-                  onClick={() => handleDeleteCapsule(capsule.id)}
-                  title="Delete capsule"
-                  aria-label="Delete capsule"
-                  className="presence-delete-button"
-                  style={{ flex: '0 0 38px', width: '38px', height: '38px', borderRadius: '12px', border: '1px solid rgba(248,113,113,0.35)', background: 'rgba(239,68,68,0.14)', color: '#fecaca', display: 'grid', placeItems: 'center', cursor: 'pointer' }}
-                >
-                  <Trash2 size={16} />
-                  <span>Delete</span>
-                </button>
-              </div>
-            ))
-          ) : (
-            <div style={{ color: 'var(--text-secondary)', fontSize: '14px' }}>No stored capsules yet.</div>
-          )}
-        </div>
-      </div>
     </div>
   );
 };
