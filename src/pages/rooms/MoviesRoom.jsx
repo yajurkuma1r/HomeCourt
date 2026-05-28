@@ -1,6 +1,7 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { Play, Pause, RotateCcw, Save, ShieldCheck } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
+import { useSocket } from '../../context/SocketContext';
 import ChatRoom from './ChatRoom';
 
 const loadYouTubeApi = () =>
@@ -75,6 +76,7 @@ const getEffectivePositionSeconds = (mediaState) => {
 
 const MoviesRoom = () => {
   const { activeHouse, user, getYouTubeMediaState, updateYouTubeMediaState } = useAuth();
+  const { socket } = useSocket();
   const isAdmin = useMemo(
     () => activeHouse?.members?.find((member) => member.userId === user?.id)?.role === 'admin',
     [activeHouse?.members, user?.id]
@@ -86,6 +88,21 @@ const MoviesRoom = () => {
   const playerRef = useRef(null);
   const playerHostRef = useRef(null);
   const lastAppliedAtRef = useRef(null);
+  const mediaStateRef = useRef(null);
+  const isAdminRef = useRef(isAdmin);
+  const houseIdRef = useRef(activeHouse?.id);
+  const applyingRemoteRef = useRef(false);
+  const adminPushTimerRef = useRef(null);
+  const lastServerPushAtRef = useRef(0);
+
+  useEffect(() => {
+    mediaStateRef.current = mediaState;
+  }, [mediaState]);
+
+  useEffect(() => {
+    isAdminRef.current = isAdmin;
+    houseIdRef.current = activeHouse?.id;
+  }, [isAdmin, activeHouse?.id]);
 
   const loadState = async () => {
     if (!activeHouse?.id) return;
@@ -108,13 +125,50 @@ const MoviesRoom = () => {
 
     const intervalId = setInterval(() => {
       loadState();
-    }, 2000);
+    }, 5000);
 
     return () => clearInterval(intervalId);
   }, [activeHouse?.id]);
 
   useEffect(() => {
+    if (!socket || !activeHouse?.id) {
+      return undefined;
+    }
+
+    const handleYouTubeUpdate = ({ houseId, media }) => {
+      if (houseId === activeHouse.id) {
+        setMediaState(media);
+        setError('');
+      }
+    };
+
+    socket.on('youtube:media-updated', handleYouTubeUpdate);
+    return () => socket.off('youtube:media-updated', handleYouTubeUpdate);
+  }, [socket, activeHouse?.id]);
+
+  useEffect(() => {
     let disposed = false;
+
+    const pushPlayerSnapshot = async (isPlaying) => {
+      const houseId = houseIdRef.current;
+      const currentState = mediaStateRef.current;
+      const player = playerRef.current;
+      if (!houseId || !currentState?.mediaId || !player || !isAdminRef.current) {
+        return;
+      }
+
+      const now = Date.now();
+      lastServerPushAtRef.current = now;
+      const response = await updateYouTubeMediaState(houseId, {
+        sourceUrl: currentState.sourceUrl || '',
+        mediaId: currentState.mediaId || '',
+        title: currentState.title || '',
+        isPlaying,
+        positionMs: Math.max(0, (player.getCurrentTime?.() || 0) * 1000),
+        durationMs: Math.max(0, (player.getDuration?.() || 0) * 1000)
+      });
+      setMediaState(response.media);
+    };
 
     loadYouTubeApi().then((YT) => {
       if (disposed || !playerHostRef.current || playerRef.current) {
@@ -126,7 +180,11 @@ const MoviesRoom = () => {
         height: '100%',
         videoId: mediaState?.mediaId || '',
         playerVars: {
-          playsinline: 1
+          playsinline: 1,
+          controls: isAdminRef.current ? 1 : 0,
+          disablekb: isAdminRef.current ? 0 : 1,
+          rel: 0,
+          modestbranding: 1
         },
         events: {
           onReady: () => {
@@ -138,6 +196,22 @@ const MoviesRoom = () => {
             if (!disposed) {
               setError('This YouTube video could not be loaded. Try a different public video URL or ID.');
             }
+          },
+          onStateChange: (event) => {
+            if (!isAdminRef.current || applyingRemoteRef.current) {
+              return;
+            }
+
+            if (event.data !== YT.PlayerState.PLAYING && event.data !== YT.PlayerState.PAUSED) {
+              return;
+            }
+
+            window.clearTimeout(adminPushTimerRef.current);
+            adminPushTimerRef.current = window.setTimeout(() => {
+              pushPlayerSnapshot(event.data === YT.PlayerState.PLAYING).catch((stateError) => {
+                setError(stateError.message || 'Could not sync YouTube playback.');
+              });
+            }, 220);
           }
         }
       });
@@ -146,6 +220,7 @@ const MoviesRoom = () => {
     return () => {
       disposed = true;
       setPlayerReady(false);
+      window.clearTimeout(adminPushTimerRef.current);
       playerRef.current?.destroy?.();
       playerRef.current = null;
     };
@@ -167,6 +242,11 @@ const MoviesRoom = () => {
       const effectivePositionSeconds = getEffectivePositionSeconds(mediaState);
 
       if (mediaState.mediaId) {
+        applyingRemoteRef.current = true;
+        window.setTimeout(() => {
+          applyingRemoteRef.current = false;
+        }, 900);
+
         const currentVideoId = player.getVideoData?.().video_id;
         if (currentVideoId !== mediaState.mediaId) {
           const nextVideoConfig = {
@@ -180,7 +260,10 @@ const MoviesRoom = () => {
             player.cueVideoById(nextVideoConfig);
           }
         } else {
-          player.seekTo(effectivePositionSeconds, true);
+          const currentSeconds = player.getCurrentTime?.() || 0;
+          if (Math.abs(currentSeconds - effectivePositionSeconds) > 1.25) {
+            player.seekTo(effectivePositionSeconds, true);
+          }
           if (mediaState.isPlaying) {
             player.playVideo();
           } else {
@@ -208,6 +291,10 @@ const MoviesRoom = () => {
     }
 
     const syncInterval = setInterval(() => {
+      if (isAdminRef.current) {
+        return;
+      }
+
       const currentVideoId = player.getVideoData?.().video_id;
       if (currentVideoId !== mediaState.mediaId) {
         return;
@@ -234,6 +321,50 @@ const MoviesRoom = () => {
     return () => clearInterval(syncInterval);
   }, [mediaState?.mediaId, mediaState?.isPlaying, mediaState?.positionMs, mediaState?.updatedAt, playerReady]);
 
+  useEffect(() => {
+    if (!isAdmin || !playerReady || !mediaState?.mediaId) {
+      return undefined;
+    }
+
+    const intervalId = setInterval(() => {
+      const player = playerRef.current;
+      const currentState = mediaStateRef.current;
+      if (!player || !currentState?.mediaId || player.getVideoData?.().video_id !== currentState.mediaId) {
+        return;
+      }
+
+      const playerState = player.getPlayerState?.();
+      if (playerState !== 1 && playerState !== 2) {
+        return;
+      }
+
+      const isPlaying = playerState === 1;
+      const currentSeconds = player.getCurrentTime?.() || 0;
+      const expectedSeconds = getEffectivePositionSeconds(currentState);
+      const driftSeconds = Math.abs(currentSeconds - expectedSeconds);
+      const stalePlayingState = currentState.isPlaying !== isPlaying;
+      const shouldRefreshPlayingClock = isPlaying && Date.now() - lastServerPushAtRef.current > 5000;
+
+      if (driftSeconds > 1.1 || stalePlayingState || shouldRefreshPlayingClock) {
+        updateYouTubeMediaState(activeHouse.id, {
+          sourceUrl: currentState.sourceUrl || '',
+          mediaId: currentState.mediaId || '',
+          title: currentState.title || '',
+          isPlaying,
+          positionMs: Math.max(0, currentSeconds * 1000),
+          durationMs: Math.max(0, (player.getDuration?.() || 0) * 1000)
+        })
+          .then((response) => {
+            lastServerPushAtRef.current = Date.now();
+            setMediaState(response.media);
+          })
+          .catch((stateError) => setError(stateError.message || 'Could not sync YouTube playback.'));
+      }
+    }, 1200);
+
+    return () => clearInterval(intervalId);
+  }, [isAdmin, playerReady, mediaState?.mediaId, activeHouse?.id, updateYouTubeMediaState]);
+
   const pushState = async (partial) => {
     const player = playerRef.current;
     const payload = {
@@ -246,6 +377,7 @@ const MoviesRoom = () => {
     };
 
     const response = await updateYouTubeMediaState(activeHouse.id, payload);
+    lastServerPushAtRef.current = Date.now();
     setMediaState(response.media);
   };
 
@@ -269,6 +401,21 @@ const MoviesRoom = () => {
       setError('');
     } catch (saveError) {
       setError(saveError.message);
+    }
+  };
+
+  const handleViewerSync = () => {
+    const player = playerRef.current;
+    if (!player || !mediaState?.mediaId) {
+      return;
+    }
+
+    const positionSeconds = getEffectivePositionSeconds(mediaState);
+    player.seekTo(positionSeconds, true);
+    if (mediaState.isPlaying) {
+      player.playVideo();
+    } else {
+      player.pauseVideo();
     }
   };
 
@@ -330,6 +477,14 @@ const MoviesRoom = () => {
                   <RotateCcw size={18} />
                 </button>
               </div>
+            ) : mediaState?.mediaId ? (
+              <button
+                onClick={handleViewerSync}
+                style={{ background: 'rgba(255,255,255,0.08)', color: 'white', border: '1px solid var(--border-glass)', borderRadius: '999px', padding: '11px 16px', display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer', fontWeight: 700 }}
+              >
+                <Play size={16} />
+                Sync Playback
+              </button>
             ) : null}
           </div>
         </div>

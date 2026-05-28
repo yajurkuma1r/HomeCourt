@@ -60,9 +60,20 @@ const StudyRoom = () => {
   const handleSaveEdit = () => {
     let mins = parseInt(editVal, 10);
     if (Number.isNaN(mins) || mins <= 0) mins = 25;
+    mins = Math.min(240, mins);
     setDefaultMinutes(mins);
     setTimeLeft(mins * 60);
+    setEditVal(String(mins));
     setIsEditing(false);
+  };
+
+  const setTimerMinutes = (mins) => {
+    const safeMins = Math.max(1, Math.min(240, Number(mins) || 25));
+    setIsRunning(false);
+    setIsEditing(false);
+    setDefaultMinutes(safeMins);
+    setTimeLeft(safeMins * 60);
+    setEditVal(String(safeMins));
   };
 
   const toggleTimer = () => {
@@ -139,6 +150,40 @@ const StudyRoom = () => {
               {!isRunning && <Edit2 size={24} color="var(--text-secondary)" />}
             </div>
           )}
+        </div>
+
+        <div className="study-timer-settings" style={{ width: 'min(100%, 360px)', display: 'flex', flexDirection: 'column', gap: '12px' }}>
+          <label style={{ display: 'flex', flexDirection: 'column', gap: '8px', color: 'var(--text-secondary)', fontSize: '13px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.08em' }}>
+            Timer minutes
+            <input
+              type="number"
+              min="1"
+              max="240"
+              value={editVal}
+              disabled={isRunning}
+              onChange={(event) => {
+                setEditVal(event.target.value);
+                const nextValue = Number(event.target.value);
+                if (Number.isFinite(nextValue) && nextValue > 0) {
+                  setTimerMinutes(nextValue);
+                }
+              }}
+              style={{ width: '100%', background: 'rgba(0,0,0,0.22)', color: 'white', border: '1px solid var(--border-glass)', borderRadius: '12px', padding: '12px 14px', outline: 'none', fontSize: '16px', textTransform: 'none', letterSpacing: 0 }}
+            />
+          </label>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '8px' }}>
+            {[15, 25, 45, 60].map((mins) => (
+              <button
+                key={mins}
+                type="button"
+                disabled={isRunning}
+                onClick={() => setTimerMinutes(mins)}
+                style={{ background: defaultMinutes === mins ? 'var(--brand-gradient)' : 'rgba(255,255,255,0.08)', color: 'white', border: '1px solid var(--border-glass)', borderRadius: '12px', padding: '10px 8px', fontWeight: 800, cursor: isRunning ? 'not-allowed' : 'pointer', opacity: isRunning ? 0.55 : 1 }}
+              >
+                {mins}
+              </button>
+            ))}
+          </div>
         </div>
 
         <div style={{ display: 'flex', gap: '24px', alignItems: 'center' }}>

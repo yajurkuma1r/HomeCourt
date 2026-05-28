@@ -510,15 +510,51 @@ iframe {
   }
 
   .uno-board-grid {
-    gap: 22px !important;
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    gap: 12px !important;
+    align-items: stretch !important;
   }
 
   .uno-board-grid > div {
     min-width: 0;
+    padding: 12px !important;
+  }
+
+  .uno-board-grid > div:nth-child(3) {
+    grid-column: 1 / -1;
   }
 
   .uno-players-panel {
     width: 100% !important;
+    padding: 14px !important;
+    max-height: none;
+  }
+
+  .uno-player-card {
+    padding: 10px 12px !important;
+  }
+
+  .uno-actions {
+    width: 100%;
+  }
+
+  .uno-actions button {
+    flex: 1 1 150px;
+    justify-content: center;
+  }
+
+  .uno-hand {
+    margin: 0 -16px;
+    padding: 4px 16px 18px !important;
+    scroll-snap-type: x mandatory;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .uno-hand button {
+    scroll-snap-align: start;
+    min-width: 74px !important;
+    height: 110px !important;
+    font-size: 22px !important;
   }
 
   .pictionary-layout {
@@ -920,14 +956,14 @@ iframe {
   }
 
   .uno-board-grid button[style*="168px"] {
-    width: 92px !important;
-    height: 132px !important;
+    width: min(36vw, 104px) !important;
+    height: min(52vw, 150px) !important;
     font-size: 22px !important;
   }
 
   .uno-board-grid div[style*="184px"] {
-    width: 102px !important;
-    height: 146px !important;
+    width: min(38vw, 112px) !important;
+    height: min(54vw, 160px) !important;
     font-size: 24px !important;
   }
 

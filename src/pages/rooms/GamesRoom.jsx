@@ -370,7 +370,7 @@ const GamesRoom = () => {
                         : 'Start a match with your house members'}
                   </div>
                 </div>
-                <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
+                <div className="uno-actions" style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
                   <button
                     onClick={() => handleUnoAction({ action: 'start-game' })}
                     disabled={!isAdmin}
@@ -454,7 +454,7 @@ const GamesRoom = () => {
                     ))}
                   </div>
                 </div>
-                <div style={{ display: 'flex', gap: '10px', overflowX: 'auto', padding: '4px 4px 18px' }}>
+                <div className="uno-hand" style={{ display: 'flex', gap: '10px', overflowX: 'auto', padding: '4px 4px 18px' }}>
                   {(unoGame?.hand || []).map((card) => (
                     <button
                       key={card.id}
@@ -480,7 +480,7 @@ const GamesRoom = () => {
                 <h3 style={{ margin: 0 }}>Players</h3>
               </div>
               {(unoGame?.players || []).map((player, index) => (
-                <div key={player.userId} className="glass-panel" style={{ padding: '12px 14px', borderRadius: '14px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '12px', borderColor: player.isCurrent ? 'rgba(255,117,140,0.55)' : 'var(--border-glass)' }}>
+                <div key={player.userId} className="glass-panel uno-player-card" style={{ padding: '12px 14px', borderRadius: '14px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '12px', borderColor: player.isCurrent ? 'rgba(255,117,140,0.55)' : 'var(--border-glass)' }}>
                   <div style={{ minWidth: 0 }}>
                     <div style={{ fontWeight: 700 }}>{index + 1}. {player.username}</div>
                     <div style={{ color: 'var(--text-secondary)', fontSize: '13px' }}>{player.isCurrent ? 'Taking turn' : 'Waiting'}</div>

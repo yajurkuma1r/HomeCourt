@@ -2445,6 +2445,10 @@ const server = createServer(async (req, res) => {
 
         db.houses[houseIndex] = updatedHouse;
         writeDb(db);
+        io.to(`house:${youtubeMediaHouseId}`).emit('youtube:media-updated', {
+          houseId: youtubeMediaHouseId,
+          media: createMediaStatePayload(nextState)
+        });
         json(res, 200, { media: createMediaStatePayload(nextState) });
       } catch (error) {
         json(res, 400, { error: error.message || 'Could not update Spotify state.' });
