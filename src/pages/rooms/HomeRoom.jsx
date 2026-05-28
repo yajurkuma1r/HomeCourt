@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { Calendar, Image as ImageIcon, Gift, MapPin, Users, Compass, Video, Music, BookOpen, Monitor, Pin, Trash2 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { useSocket } from '../../context/SocketContext';
+import { formatLocalDateTime, localDateTimeToMs } from '../../dateTime';
 
 const ResumeSessionCard = ({ session, navigate }) => {
   const formatTime = (ms) => {
@@ -114,7 +115,19 @@ const LiveSessionCard = ({ session, navigate, currentTime }) => {
 };
 
 const HomeRoom = () => {
-  const { user, activeHouse, updateMemberLocation, getHouseMembers, getSpotifyMediaState, getYouTubeMediaState, getHouseEvents, getHouseCapsules, getVault } = useAuth();
+  const {
+    user,
+    activeHouse,
+    updateMemberLocation,
+    getHouseMembers,
+    getSpotifyMediaState,
+    getYouTubeMediaState,
+    getHouseEvents,
+    deleteHouseEvent,
+    getHouseCapsules,
+    deleteHouseCapsule,
+    getVault
+  } = useAuth();
   const { socket, footprints } = useSocket();
   const navigate = useNavigate();
   const lastLocationSentAtRef = useRef(0);
@@ -144,6 +157,9 @@ const HomeRoom = () => {
   const [sessions, setSessions] = useState([]);
   const [recentSessions, setRecentSessions] = useState([]);
   const [stats, setStats] = useState({ scheduledEvents: 0, liveEvents: 0, scheduledCapsules: 0, liveCapsules: 0, onThisDay: 0 });
+  const [storedEvents, setStoredEvents] = useState([]);
+  const [storedCapsules, setStoredCapsules] = useState([]);
+  const [dashboardError, setDashboardError] = useState('');
   const [currentTime, setCurrentTime] = useState(() => Date.now());
 
   useEffect(() => {
@@ -215,12 +231,12 @@ const HomeRoom = () => {
       }).length;
       
       const eventsList = calendarData?.events || [];
-      const scheduledEventsCount = eventsList.filter(e => new Date(e.date) > today).length;
-      const liveEventsCount = eventsList.filter(e => new Date(e.date) <= today).length;
+      const scheduledEventsCount = eventsList.filter(e => localDateTimeToMs(e.date) > today.getTime()).length;
+      const liveEventsCount = eventsList.filter(e => localDateTimeToMs(e.date) <= today.getTime()).length;
 
       const capsulesList = capsulesData?.capsules || [];
-      const scheduledCapsulesCount = capsulesList.filter(c => new Date(c.unlockAt) > today).length;
-      const liveCapsulesCount = capsulesList.filter(c => new Date(c.unlockAt) <= today).length;
+      const scheduledCapsulesCount = capsulesList.filter(c => localDateTimeToMs(c.unlockAt) > today.getTime()).length;
+      const liveCapsulesCount = capsulesList.filter(c => localDateTimeToMs(c.unlockAt) <= today.getTime()).length;
 
       setStats({
         scheduledEvents: scheduledEventsCount,
@@ -229,6 +245,9 @@ const HomeRoom = () => {
         liveCapsules: liveCapsulesCount,
         onThisDay: onThisDayCount
       });
+      setStoredEvents(eventsList);
+      setStoredCapsules(capsulesList);
+      setDashboardError('');
       const active = [];
       const recent = [];
 
@@ -298,8 +317,31 @@ const HomeRoom = () => {
       setRecentSessions(recent);
     } catch (error) {
       console.error('Failed to fetch live sessions:', error);
+      setDashboardError(error.message || 'Could not refresh Presence Room data.');
     }
   }, [activeHouse?.id, getHouseEvents, getHouseCapsules, getVault, getHouseMembers, getSpotifyMediaState, getYouTubeMediaState]);
+
+  const handleDeleteEvent = async (eventId) => {
+    if (!activeHouse?.id || !eventId) return;
+    try {
+      await deleteHouseEvent(activeHouse.id, eventId);
+      await fetchSessions();
+      setDashboardError('');
+    } catch (error) {
+      setDashboardError(error.message || 'Could not delete event.');
+    }
+  };
+
+  const handleDeleteCapsule = async (capsuleId) => {
+    if (!activeHouse?.id || !capsuleId) return;
+    try {
+      await deleteHouseCapsule(activeHouse.id, capsuleId);
+      await fetchSessions();
+      setDashboardError('');
+    } catch (error) {
+      setDashboardError(error.message || 'Could not delete capsule.');
+    }
+  };
 
   useEffect(() => {
     fetchSessions();
@@ -582,6 +624,11 @@ const HomeRoom = () => {
       )}
 
       <h2 style={{ paddingLeft: '8px', margin: 0, alignSelf: 'center', fontSize: '20px' }}>House Dashboard (Code: {activeHouse?.code || 'MOCK'})</h2>
+      {dashboardError ? (
+        <div className="glass-panel" style={{ maxWidth: '1000px', width: '100%', margin: '0 auto', padding: '12px 16px', color: '#fecdd3', borderColor: 'rgba(244,114,182,0.3)' }}>
+          {dashboardError}
+        </div>
+      ) : null}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: '14px', maxWidth: '1000px', width: '100%', margin: '0 auto', flex: 1 }}>
         <div onClick={() => navigate('/calendar')} className="glass-panel" style={{ padding: '16px', display: 'flex', flexDirection: 'column', gap: '10px', cursor: 'pointer', position: 'relative' }}>
           {renderFootprint('/calendar')}
@@ -634,6 +681,64 @@ const HomeRoom = () => {
             <h3 style={{ margin: 0 }}>Shared Screen Box</h3>
           </div>
           <p style={{ color: 'var(--text-secondary)', fontSize: '14px', margin: 0 }}>View the admin's broadcasted screen live. Starting a screen share works on desktop only.</p>
+        </div>
+      </div>
+
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '14px', maxWidth: '1000px', width: '100%', margin: '0 auto 8px' }}>
+        <div className="glass-panel" style={{ padding: '16px', display: 'flex', flexDirection: 'column', gap: '12px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+            <Calendar size={18} color="var(--primary)" />
+            <h3 style={{ margin: 0 }}>Stored House Events</h3>
+          </div>
+          {storedEvents.length > 0 ? (
+            storedEvents.slice(0, 5).map((event) => (
+              <div key={event.id} style={{ display: 'flex', justifyContent: 'space-between', gap: '12px', alignItems: 'flex-start', padding: '10px', borderRadius: '12px', background: 'rgba(255,255,255,0.055)' }}>
+                <div style={{ minWidth: 0 }}>
+                  <strong style={{ display: 'block', overflowWrap: 'anywhere' }}>{event.title}</strong>
+                  <div style={{ color: 'var(--text-secondary)', fontSize: '12px', marginTop: '4px' }}>{formatLocalDateTime(event.date)}</div>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => handleDeleteEvent(event.id)}
+                  title="Delete event"
+                  aria-label="Delete event"
+                  style={{ flex: '0 0 38px', width: '38px', height: '38px', borderRadius: '12px', border: '1px solid rgba(248,113,113,0.35)', background: 'rgba(239,68,68,0.14)', color: '#fecaca', display: 'grid', placeItems: 'center', cursor: 'pointer' }}
+                >
+                  <Trash2 size={16} />
+                </button>
+              </div>
+            ))
+          ) : (
+            <div style={{ color: 'var(--text-secondary)', fontSize: '14px' }}>No stored events yet.</div>
+          )}
+        </div>
+
+        <div className="glass-panel" style={{ padding: '16px', display: 'flex', flexDirection: 'column', gap: '12px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+            <Gift size={18} color="#22c55e" />
+            <h3 style={{ margin: 0 }}>Stored Surprise Capsules</h3>
+          </div>
+          {storedCapsules.length > 0 ? (
+            storedCapsules.slice(0, 5).map((capsule) => (
+              <div key={capsule.id} style={{ display: 'flex', justifyContent: 'space-between', gap: '12px', alignItems: 'flex-start', padding: '10px', borderRadius: '12px', background: 'rgba(255,255,255,0.055)' }}>
+                <div style={{ minWidth: 0 }}>
+                  <strong style={{ display: 'block', overflowWrap: 'anywhere' }}>{capsule.title}</strong>
+                  <div style={{ color: 'var(--text-secondary)', fontSize: '12px', marginTop: '4px' }}>Opens {formatLocalDateTime(capsule.unlockAt)}</div>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => handleDeleteCapsule(capsule.id)}
+                  title="Delete capsule"
+                  aria-label="Delete capsule"
+                  style={{ flex: '0 0 38px', width: '38px', height: '38px', borderRadius: '12px', border: '1px solid rgba(248,113,113,0.35)', background: 'rgba(239,68,68,0.14)', color: '#fecaca', display: 'grid', placeItems: 'center', cursor: 'pointer' }}
+                >
+                  <Trash2 size={16} />
+                </button>
+              </div>
+            ))
+          ) : (
+            <div style={{ color: 'var(--text-secondary)', fontSize: '14px' }}>No stored capsules yet.</div>
+          )}
         </div>
       </div>
     </div>

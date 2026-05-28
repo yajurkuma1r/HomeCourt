@@ -426,12 +426,73 @@ const getHouseRecipientEmails = (house) =>
     )
   );
 
+const getNotificationTimeZone = () => process.env.NOTIFICATION_TIME_ZONE || 'Asia/Kolkata';
+
+const getTimeZoneOffsetMs = (timeZone, timestampMs) => {
+  const date = new Date(timestampMs);
+  const parts = new Intl.DateTimeFormat('en-US', {
+    timeZone,
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+    hour: '2-digit',
+    minute: '2-digit',
+    second: '2-digit',
+    hourCycle: 'h23'
+  }).formatToParts(date);
+
+  const values = Object.fromEntries(parts.filter((part) => part.type !== 'literal').map((part) => [part.type, part.value]));
+  const zonedUtcMs = Date.UTC(
+    Number(values.year),
+    Number(values.month) - 1,
+    Number(values.day),
+    Number(values.hour),
+    Number(values.minute),
+    Number(values.second)
+  );
+
+  return zonedUtcMs - timestampMs;
+};
+
+const parseScheduledTimeMs = (value) => {
+  const raw = String(value || '').trim();
+  if (!raw) {
+    return NaN;
+  }
+
+  if (/[zZ]|[+-]\d{2}:?\d{2}$/.test(raw)) {
+    return new Date(raw).getTime();
+  }
+
+  const match = raw.match(/^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2})(?::(\d{2}))?/);
+  if (!match) {
+    return new Date(raw).getTime();
+  }
+
+  const [, year, month, day, hour, minute, second = '0'] = match;
+  const localAsUtcMs = Date.UTC(Number(year), Number(month) - 1, Number(day), Number(hour), Number(minute), Number(second));
+  const offsetMs = getTimeZoneOffsetMs(getNotificationTimeZone(), localAsUtcMs);
+  return localAsUtcMs - offsetMs;
+};
+
 const formatNotificationTime = (isoDate) =>
   new Intl.DateTimeFormat('en', {
     dateStyle: 'medium',
     timeStyle: 'short',
-    timeZone: process.env.NOTIFICATION_TIME_ZONE || 'Asia/Kolkata'
+    timeZone: getNotificationTimeZone()
   }).format(new Date(isoDate));
+
+const formatScheduledNotificationTime = (dateValue) => {
+  const timestampMs = parseScheduledTimeMs(dateValue);
+  if (!Number.isFinite(timestampMs)) {
+    return String(dateValue || '');
+  }
+  return new Intl.DateTimeFormat('en', {
+    dateStyle: 'medium',
+    timeStyle: 'short',
+    timeZone: getNotificationTimeZone()
+  }).format(new Date(timestampMs));
+};
 
 const sendHouseNotificationEmail = async ({ house, subject, text, html }) => {
   const transport = getEmailTransport();
@@ -3522,14 +3583,14 @@ const checkDueNotifications = async () => {
   try {
     for (const house of db.houses || []) {
       for (const event of house.events || []) {
-        const eventTime = new Date(event.date).getTime();
+        const eventTime = parseScheduledTimeMs(event.date);
         if (
           !event.emailNotifiedAt &&
           Number.isFinite(eventTime) &&
           eventTime <= now &&
           eventTime >= earliestDueTime
         ) {
-          const when = formatNotificationTime(event.date);
+          const when = formatScheduledNotificationTime(event.date);
           const subject = `HomeCourt event now: ${event.title}`;
           const text = `${event.title} is happening now for ${house.name}.\n\nWhen: ${when}\n\n${event.message || ''}`;
           const html = createEmailShell({
@@ -3551,14 +3612,14 @@ const checkDueNotifications = async () => {
       }
 
       for (const capsule of house.capsules || []) {
-        const unlockTime = new Date(capsule.unlockAt).getTime();
+        const unlockTime = parseScheduledTimeMs(capsule.unlockAt);
         if (
           !capsule.emailNotifiedAt &&
           Number.isFinite(unlockTime) &&
           unlockTime <= now &&
           unlockTime >= earliestDueTime
         ) {
-          const when = formatNotificationTime(capsule.unlockAt);
+          const when = formatScheduledNotificationTime(capsule.unlockAt);
           const subject = `HomeCourt capsule unlocked: ${capsule.title}`;
           const text = `${capsule.title} just unlocked in ${house.name}.\n\nUnlocked: ${when}\n\nOpen HomeCourt to view it.`;
           const html = createEmailShell({
